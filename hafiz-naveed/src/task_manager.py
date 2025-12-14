@@ -7,7 +7,7 @@ ensures data integrity.
 """
 
 from typing import List, Optional
-from src.models import Task
+from models import Task
 
 
 class TodoActionAgent:

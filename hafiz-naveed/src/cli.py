@@ -6,7 +6,7 @@ menu display, user input, and request routing to TodoActionAgent.
 """
 
 from typing import Optional
-from src.task_manager import TodoActionAgent
+from task_manager import TodoActionAgent
 
 
 class HafizNaveed:

@@ -5,9 +5,13 @@ Tests all task operations including creation, retrieval, updating,
 deletion, and completion marking.
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
 import pytest
-from src.task_manager import TodoActionAgent
-from src.models import Task
+from task_manager import TodoActionAgent
+from models import Task
 
 
 class TestTodoActionAgentBasics:

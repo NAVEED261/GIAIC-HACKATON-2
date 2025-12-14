@@ -9,7 +9,7 @@ This module serves as the application entry point for the
 Phase-1 console CLI implementation.
 """
 
-from src.cli import HafizNaveed
+from cli import HafizNaveed
 
 
 def main() -> None:
