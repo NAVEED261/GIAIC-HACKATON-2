@@ -45,43 +45,43 @@ export default function TaskCard({
 
   return (
     <div className="card card-hover border-l-4 border-blue-500">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-800">{task.title}</h3>
-          <p className="text-sm text-gray-500 mt-1">Created: {createdDate}</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2 sm:mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 break-words">{task.title}</h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Created: {createdDate}</p>
         </div>
       </div>
 
       {/* Description */}
       {task.description && (
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{task.description}</p>
+        <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">{task.description}</p>
       )}
 
       {/* Status and Priority */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
         <span
-          className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${
+          className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${
             statusColors[task.status]
           }`}
         >
           {statusLabels[task.status]}
         </span>
-        <span className="inline-block px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium border border-gray-300">
+        <span className="inline-block px-2 sm:px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium border border-gray-300">
           {priorityIcons[task.priority]} {priorityLabels[task.priority]}
         </span>
 
         {dueDate && (
-          <span className="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium border border-orange-300">
-            📅 Due: {dueDate}
+          <span className="inline-block px-2 sm:px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium border border-orange-300 whitespace-nowrap">
+            📅 {dueDate}
           </span>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Link
           href={`/dashboard/tasks/${task.id}/edit`}
-          className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium text-center transition-colors"
+          className="flex-1 px-2 sm:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs sm:text-sm font-medium text-center transition-colors"
         >
           Edit
         </Link>
@@ -90,7 +90,7 @@ export default function TaskCard({
           <button
             onClick={() => onComplete(task.id)}
             disabled={isLoading}
-            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 text-sm font-medium transition-colors"
+            className="flex-1 px-2 sm:px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 text-xs sm:text-sm font-medium transition-colors"
           >
             ✅ Complete
           </button>
@@ -104,7 +104,7 @@ export default function TaskCard({
               }
             }}
             disabled={isLoading}
-            className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 text-sm font-medium transition-colors"
+            className="flex-1 px-2 sm:px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 text-xs sm:text-sm font-medium transition-colors"
           >
             Delete
           </button>
