@@ -14,16 +14,34 @@ Endpoints:
   PATCH  /api/tasks/{id}/complete - Mark task complete
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
+from pydantic import BaseModel, validator
 
 from db import get_db
 from models.task import Task, TaskResponse, TaskCreate, TaskUpdate
 from models.user import User
+from dependencies.auth import get_current_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
+
+
+# ============================================================================
+# Request/Response Schema Classes
+# ============================================================================
+
+class TaskListQuery(BaseModel):
+    """Query parameters for task list endpoint."""
+    skip: int = Query(0, ge=0, description="Number of tasks to skip")
+    limit: int = Query(10, ge=1, le=100, description="Number per page (max 100)")
+    status: Optional[str] = Query(None, description="Filter by status")
+    sort_by: str = Query("created_at", description="Sort field")
+    order: str = Query("desc", description="Sort order (asc/desc)")
 
 
 # ============================================================================
@@ -37,6 +55,7 @@ router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
     responses={
         200: {"description": "List of user's tasks"},
         401: {"description": "Not authenticated"},
+        422: {"description": "Validation error"},
         500: {"description": "Internal server error"},
     },
     summary="List User's Tasks",
@@ -66,38 +85,33 @@ Retrieve paginated list of authenticated user's tasks.
     "updated_at": "2025-01-01T10:00:00",
     "completed_at": null,
     "user_id": "uuid-here"
-  },
-  ...
+  }
 ]
 ```
 
 **Error Responses:**
-- `401`: Not authenticated (missing or invalid token)
+- `401`: Not authenticated
+- `422`: Validation error
 - `500`: Server error
 
-**Pagination Example:**
-- Get first 10: `GET /api/tasks?skip=0&limit=10`
-- Get next 10: `GET /api/tasks?skip=10&limit=10`
-- Get page 3: `GET /api/tasks?skip=20&limit=10`
-
-**Security:** Tasks are automatically filtered by user_id (multi-user isolation).
+**Security:** Tasks auto-filtered by user_id (multi-user isolation).
     """,
 )
 async def list_tasks(
-    skip: int = Query(0, ge=0, description="Number of tasks to skip"),
-    limit: int = Query(10, ge=1, le=100, description="Number of tasks per page (max 100)"),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    sort_by: str = Query("created_at", description="Sort field"),
-    order: str = Query("desc", description="Sort order (asc/desc)"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    status: Optional[str] = Query(None),
+    sort_by: str = Query("created_at"),
+    order: str = Query("desc"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     List user's tasks with pagination and filtering.
 
     Args:
         skip: Number of tasks to skip
-        limit: Number of tasks per page (max 100)
+        limit: Number of tasks per page
         status: Optional status filter
         sort_by: Field to sort by
         order: Sort order (asc/desc)
@@ -106,19 +120,58 @@ async def list_tasks(
 
     Returns:
         List[TaskResponse]: Paginated list of user's tasks
-
-    Raises:
-        HTTPException 401: Not authenticated
-        HTTPException 500: Server error
     """
-    # TODO: Implement task list logic
-    # 1. Validate user is authenticated
-    # 2. Query tasks filtered by user_id
-    # 3. Apply status filter if provided
-    # 4. Sort by specified field and order
-    # 5. Apply pagination (skip/limit)
-    # 6. Return list of TaskResponse objects
-    pass
+    try:
+        # Build base query - only user's tasks
+        query = db.query(Task).filter(Task.user_id == current_user.id)
+
+        # Apply status filter if provided
+        if status:
+            query = query.filter(Task.status == status)
+
+        # Determine sort column
+        if sort_by == "title":
+            sort_column = Task.title
+        elif sort_by == "status":
+            sort_column = Task.status
+        else:  # default to created_at
+            sort_column = Task.created_at
+
+        # Apply sorting
+        if order.lower() == "asc":
+            query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(sort_column.desc())
+
+        # Get total count
+        total = query.count()
+
+        # Apply pagination
+        tasks = query.offset(skip).limit(limit).all()
+
+        logger.info(f"User {current_user.id} listed {len(tasks)} tasks")
+
+        return [
+            TaskResponse(
+                id=task.id,
+                title=task.title,
+                description=task.description,
+                status=task.status,
+                priority=task.priority,
+                created_at=task.created_at,
+                updated_at=task.updated_at,
+                completed_at=task.completed_at,
+                user_id=task.user_id,
+            )
+            for task in tasks
+        ]
+
+    except Exception as e:
+        logger.error(f"List tasks error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve tasks",
+        )
 
 
 # ============================================================================
@@ -133,6 +186,7 @@ async def list_tasks(
         201: {"description": "Task created successfully"},
         400: {"description": "Invalid task data"},
         401: {"description": "Not authenticated"},
+        422: {"description": "Validation error"},
         500: {"description": "Internal server error"},
     },
     summary="Create New Task",
@@ -164,49 +218,67 @@ Create a new task for authenticated user.
 ```
 
 **Error Responses:**
-- `400`: Invalid input (empty title, title too long)
+- `400`: Invalid input
 - `401`: Not authenticated
+- `422`: Validation error
 - `500`: Server error
-
-**Field Constraints:**
-- `title`: Required, 1-200 characters
-- `description`: Optional, up to 1000 characters
-- `status`: Optional, defaults to "Pending"
-- `priority`: Optional, defaults to "Medium"
 
 **Security:** Task automatically associated with authenticated user.
     """,
 )
 async def create_task(
-    task: TaskCreate,
+    task_create: TaskCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     Create new task for authenticated user.
 
     Args:
-        task: Task creation data
+        task_create: Task creation data
         db: Database session
         current_user: Authenticated user
 
     Returns:
         TaskResponse: Created task with assigned ID
-
-    Raises:
-        HTTPException 400: Invalid task data
-        HTTPException 401: Not authenticated
-        HTTPException 500: Server error
     """
-    # TODO: Implement task creation logic
-    # 1. Validate user is authenticated
-    # 2. Validate task data (title not empty, within limits)
-    # 3. Create task record with user_id from current_user
-    # 4. Set default status and priority if not provided
-    # 5. Auto-generate created_at and updated_at timestamps
-    # 6. Commit to database
-    # 7. Return TaskResponse with new task ID
-    pass
+    try:
+        # Create task
+        new_task = Task(
+            user_id=current_user.id,
+            title=task_create.title,
+            description=task_create.description,
+            status=task_create.status or "Pending",
+            priority=task_create.priority or "Medium",
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+        )
+
+        db.add(new_task)
+        db.commit()
+        db.refresh(new_task)
+
+        logger.info(f"User {current_user.id} created task {new_task.id}")
+
+        return TaskResponse(
+            id=new_task.id,
+            title=new_task.title,
+            description=new_task.description,
+            status=new_task.status,
+            priority=new_task.priority,
+            created_at=new_task.created_at,
+            updated_at=new_task.updated_at,
+            completed_at=new_task.completed_at,
+            user_id=new_task.user_id,
+        )
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Create task error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create task",
+        )
 
 
 # ============================================================================
@@ -251,17 +323,17 @@ Retrieve details of a specific task.
 
 **Error Responses:**
 - `401`: Not authenticated
-- `403`: Access denied (task belongs to different user)
+- `403`: Access denied (not task owner)
 - `404`: Task not found
 - `500`: Server error
 
-**Security:** Only task owner can view task details (enforced via user_id check).
+**Security:** Only task owner can view task details.
     """,
 )
 async def get_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get task details.
@@ -273,20 +345,45 @@ async def get_task(
 
     Returns:
         TaskResponse: Task details
-
-    Raises:
-        HTTPException 401: Not authenticated
-        HTTPException 403: Access denied
-        HTTPException 404: Task not found
-        HTTPException 500: Server error
     """
-    # TODO: Implement get task logic
-    # 1. Validate user is authenticated
-    # 2. Query task by ID
-    # 3. Check task exists (404 if not)
-    # 4. Check task belongs to current user (403 if not)
-    # 5. Return TaskResponse
-    pass
+    try:
+        # Get task
+        task = db.query(Task).filter(Task.id == task_id).first()
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+
+        # Check ownership
+        if task.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} attempted unauthorized access to task {task_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
+
+        return TaskResponse(
+            id=task.id,
+            title=task.title,
+            description=task.description,
+            status=task.status,
+            priority=task.priority,
+            created_at=task.created_at,
+            updated_at=task.updated_at,
+            completed_at=task.completed_at,
+            user_id=task.user_id,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get task error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve task",
+        )
 
 
 # ============================================================================
@@ -303,6 +400,7 @@ async def get_task(
         401: {"description": "Not authenticated"},
         403: {"description": "Access denied (not task owner)"},
         404: {"description": "Task not found"},
+        422: {"description": "Validation error"},
         500: {"description": "Internal server error"},
     },
     summary="Update Task",
@@ -339,21 +437,19 @@ Update an existing task.
 **Error Responses:**
 - `400`: Invalid input
 - `401`: Not authenticated
-- `403`: Access denied (task belongs to different user)
+- `403`: Access denied
 - `404`: Task not found
+- `422`: Validation error
 - `500`: Server error
 
-**Partial Updates:**
-Send only fields you want to update. Unspecified fields remain unchanged.
-
-**Security:** Only task owner can update task (enforced via user_id check).
+**Security:** Only task owner can update task.
     """,
 )
 async def update_task(
     task_id: int,
     task_update: TaskUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     Update existing task.
@@ -366,23 +462,63 @@ async def update_task(
 
     Returns:
         TaskResponse: Updated task
-
-    Raises:
-        HTTPException 400: Invalid data
-        HTTPException 401: Not authenticated
-        HTTPException 403: Access denied
-        HTTPException 404: Task not found
-        HTTPException 500: Server error
     """
-    # TODO: Implement task update logic
-    # 1. Validate user is authenticated
-    # 2. Query task by ID (404 if not found)
-    # 3. Check task belongs to current user (403 if not)
-    # 4. Update only specified fields
-    # 5. Update updated_at timestamp
-    # 6. Commit changes
-    # 7. Return updated TaskResponse
-    pass
+    try:
+        # Get task
+        task = db.query(Task).filter(Task.id == task_id).first()
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+
+        # Check ownership
+        if task.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} attempted unauthorized update to task {task_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
+
+        # Update fields if provided
+        if task_update.title is not None:
+            task.title = task_update.title
+        if task_update.description is not None:
+            task.description = task_update.description
+        if task_update.status is not None:
+            task.status = task_update.status
+        if task_update.priority is not None:
+            task.priority = task_update.priority
+
+        task.updated_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(task)
+
+        logger.info(f"User {current_user.id} updated task {task_id}")
+
+        return TaskResponse(
+            id=task.id,
+            title=task.title,
+            description=task.description,
+            status=task.status,
+            priority=task.priority,
+            created_at=task.created_at,
+            updated_at=task.updated_at,
+            completed_at=task.completed_at,
+            user_id=task.user_id,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Update task error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update task",
+        )
 
 
 # ============================================================================
@@ -414,19 +550,17 @@ No content returned.
 
 **Error Responses:**
 - `401`: Not authenticated
-- `403`: Access denied (task belongs to different user)
+- `403`: Access denied
 - `404`: Task not found
 - `500`: Server error
 
-**Note:** This is a hard delete. Consider soft delete if audit trail needed.
-
-**Security:** Only task owner can delete task (enforced via user_id check).
+**Security:** Only task owner can delete task.
     """,
 )
 async def delete_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     Delete task permanently.
@@ -435,21 +569,40 @@ async def delete_task(
         task_id: ID of task to delete
         db: Database session
         current_user: Authenticated user
-
-    Raises:
-        HTTPException 401: Not authenticated
-        HTTPException 403: Access denied
-        HTTPException 404: Task not found
-        HTTPException 500: Server error
     """
-    # TODO: Implement task delete logic
-    # 1. Validate user is authenticated
-    # 2. Query task by ID (404 if not found)
-    # 3. Check task belongs to current user (403 if not)
-    # 4. Delete task from database
-    # 5. Commit changes
-    # 6. Return 204 No Content
-    pass
+    try:
+        # Get task
+        task = db.query(Task).filter(Task.id == task_id).first()
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+
+        # Check ownership
+        if task.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} attempted unauthorized delete of task {task_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
+
+        # Delete task
+        db.delete(task)
+        db.commit()
+
+        logger.info(f"User {current_user.id} deleted task {task_id}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Delete task error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete task",
+        )
 
 
 # ============================================================================
@@ -495,7 +648,7 @@ Mark a task as completed.
 
 **Error Responses:**
 - `401`: Not authenticated
-- `403`: Access denied (task belongs to different user)
+- `403`: Access denied
 - `404`: Task not found
 - `409`: Task already completed
 - `500`: Server error
@@ -503,15 +656,14 @@ Mark a task as completed.
 **What This Does:**
 - Sets `status` to "Completed"
 - Sets `completed_at` to current timestamp
-- Updates `updated_at` timestamp
 
-**Security:** Only task owner can mark task complete (enforced via user_id check).
+**Security:** Only task owner can mark task complete.
     """,
 )
 async def complete_task(
     task_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(lambda: None),  # TODO: use get_current_user
+    current_user: User = Depends(get_current_user),
 ):
     """
     Mark task as completed.
@@ -523,22 +675,60 @@ async def complete_task(
 
     Returns:
         TaskResponse: Updated task with status "Completed"
-
-    Raises:
-        HTTPException 401: Not authenticated
-        HTTPException 403: Access denied
-        HTTPException 404: Task not found
-        HTTPException 409: Already completed
-        HTTPException 500: Server error
     """
-    # TODO: Implement complete task logic
-    # 1. Validate user is authenticated
-    # 2. Query task by ID (404 if not found)
-    # 3. Check task belongs to current user (403 if not)
-    # 4. Check task not already completed (409 if it is)
-    # 5. Set status to "Completed"
-    # 6. Set completed_at to current timestamp
-    # 7. Update updated_at timestamp
-    # 8. Commit changes
-    # 9. Return updated TaskResponse
-    pass
+    try:
+        # Get task
+        task = db.query(Task).filter(Task.id == task_id).first()
+
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+
+        # Check ownership
+        if task.user_id != current_user.id:
+            logger.warning(f"User {current_user.id} attempted unauthorized complete of task {task_id}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied",
+            )
+
+        # Check if already completed
+        if task.status == "Completed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Task already completed",
+            )
+
+        # Mark as completed
+        task.status = "Completed"
+        task.completed_at = datetime.utcnow()
+        task.updated_at = datetime.utcnow()
+
+        db.commit()
+        db.refresh(task)
+
+        logger.info(f"User {current_user.id} completed task {task_id}")
+
+        return TaskResponse(
+            id=task.id,
+            title=task.title,
+            description=task.description,
+            status=task.status,
+            priority=task.priority,
+            created_at=task.created_at,
+            updated_at=task.updated_at,
+            completed_at=task.completed_at,
+            user_id=task.user_id,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Complete task error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to complete task",
+        )
