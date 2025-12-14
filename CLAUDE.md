@@ -66,21 +66,52 @@ specs/
 ### Root Structure
 ```
 hackathon-2/
-├── .spec-kit/config.yaml             # Spec-Kit configuration
-├── specs/                             # Specifications (this directory)
+├── Phase-1/                           # Phase-1 Console App (Complete ✅)
+│   ├── hafiz-naveed/
+│   │   ├── src/                       # Source code (402 lines)
+│   │   ├── tests/                     # Tests (621 lines, 53 tests)
+│   │   ├── docs/                      # Documentation
+│   │   ├── phase-1/                   # Specification
+│   │   └── README.md                  # Phase-1 quick start
+│   └── README.md                      # Phase-1 overview
+│
+├── Phase-2/                           # Phase-2 Full-Stack Web (In Progress 🔄)
+│   ├── .spec-kit/                     # Spec-Kit configuration
+│   ├── specs/                         # Specifications
+│   │   ├── phase-2-overview.md       # Main spec (639 lines)
+│   │   ├── features/                  # Feature specs
+│   │   ├── api/                       # API specs
+│   │   ├── database/                  # Database specs
+│   │   └── ui/                        # UI specs
+│   ├── frontend/                      # Next.js 16+ (to be created)
+│   ├── backend/                       # FastAPI (to be created)
+│   ├── docker-compose.yml             # Local development
+│   └── README.md                      # Phase-2 quick start
+│
+├── Phase-3/                           # Phase-3 AI Chatbot (Planned 📋)
+│   └── README.md                      # Phase-3 placeholder
+│
+├── Phase-4/                           # Phase-4 Kubernetes (Planned 📋)
+│   └── README.md                      # Phase-4 placeholder
+│
+├── Phase-5/                           # Phase-5 Cloud-Scale (Planned 📋)
+│   └── README.md                      # Phase-5 placeholder
+│
 ├── history/prompts/                   # Prompt History Records (PHRs)
-├── hafiz-naveed/                      # Phase-1 (preserved)
-├── frontend/                          # Next.js 16+ application
-├── backend/                           # FastAPI application
-├── docker-compose.yml                 # Local development
+│   ├── phase-1/                       # Phase-1 PHRs
+│   └── phase-2/                       # Phase-2 PHRs
+│
 ├── CLAUDE.md                          # This file (root instructions)
-└── README.md                          # Project overview
+├── README.md                          # Project overview
+└── .gitignore                         # Git ignore patterns
 ```
 
-### Phase Isolation
-- **Phase-1** lives in `hafiz-naveed/` folder (separate, complete)
-- **Phase-2** in monorepo root: `frontend/` + `backend/` + `specs/`
-- **Future phases** follow same pattern: separate folders + shared specs
+### Phase Isolation (Spec-Kit SDD Approach)
+- **Phase-1** in `Phase-1/` folder (complete, separate environment)
+- **Phase-2** in `Phase-2/` folder (in progress, separate environment)
+- **Phases 3-5** follow same pattern: each phase is separate folder
+- **Shared**: Git repository, specifications philosophy, architecture patterns
+- **Benefits**: Clear organization, local visibility, easy multi-phase work
 
 ---
 
