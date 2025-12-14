@@ -7,10 +7,13 @@ menu navigation, and error handling.
 
 import io
 import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
 from unittest.mock import patch
 import pytest
-from src.cli import HafizNaveed
-from src.task_manager import TodoActionAgent
+from cli import HafizNaveed
+from task_manager import TodoActionAgent
 
 
 class TestHafizNaveedBasics:
