@@ -50,68 +50,93 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navigation */}
-      <nav className="bg-white shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="text-2xl font-bold text-blue-600">
-            Task Manager
-          </Link>
+      <nav className="bg-white shadow-md sticky top-0 z-40">
+        <div className="max-w-full px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <Link href="/dashboard" className="text-xl sm:text-2xl font-bold text-blue-600">
+              Task Manager
+            </Link>
 
-          <div className="flex items-center space-x-4">
             {user && (
-              <>
-                <span className="text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                <span className="text-xs sm:text-sm text-gray-600 break-words">
                   Welcome, <span className="font-semibold">{user.name}</span>
                 </span>
                 <button
                   onClick={handleLogout}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 font-medium"
+                  className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 font-medium text-sm"
                 >
                   Logout
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <div className="flex">
-        <aside className="w-48 bg-white shadow-md min-h-screen p-4">
-          <nav className="space-y-2">
+      {/* Main Content Area */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside className="w-40 sm:w-48 bg-white shadow-md min-h-full overflow-y-auto hidden sm:block">
+          <nav className="space-y-1 p-3 sm:p-4">
             <Link
               href="/dashboard"
-              className="block px-4 py-2 rounded-lg hover:bg-blue-50 text-blue-600 font-medium"
+              className="block px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-50 text-blue-600 font-medium text-sm sm:text-base"
             >
               📊 Dashboard
             </Link>
             <Link
               href="/dashboard/tasks/create"
-              className="block px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+              className="block px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-sm sm:text-base"
             >
               ➕ Create Task
             </Link>
             <Link
               href="/dashboard/tasks"
-              className="block px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600"
+              className="block px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-sm sm:text-base"
             >
               📝 My Tasks
             </Link>
           </nav>
         </aside>
 
+        {/* Mobile Navigation */}
+        <div className="sm:hidden w-full border-b border-gray-200 bg-white">
+          <nav className="flex gap-1 p-2 overflow-x-auto">
+            <Link
+              href="/dashboard"
+              className="px-3 py-2 rounded-lg hover:bg-blue-50 text-blue-600 font-medium text-xs whitespace-nowrap flex-shrink-0"
+            >
+              📊 Dashboard
+            </Link>
+            <Link
+              href="/dashboard/tasks/create"
+              className="px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-xs whitespace-nowrap flex-shrink-0"
+            >
+              ➕ Create
+            </Link>
+            <Link
+              href="/dashboard/tasks"
+              className="px-3 py-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-xs whitespace-nowrap flex-shrink-0"
+            >
+              📝 Tasks
+            </Link>
+          </nav>
+        </div>
+
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto">
           {children}
         </main>
       </div>
 
       {/* Footer */}
-      <footer className="bg-dark text-white py-8 mt-12">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p>&copy; 2025 Hackathon-2 Task Manager. All rights reserved.</p>
+      <footer className="bg-dark text-white py-4 sm:py-6 md:py-8 mt-8 sm:mt-12">
+        <div className="max-w-full px-4 sm:px-6 text-center">
+          <p className="text-xs sm:text-sm">&copy; 2025 Hackathon-2 Task Manager. All rights reserved.</p>
         </div>
       </footer>
     </div>
