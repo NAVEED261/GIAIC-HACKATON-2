@@ -1,0 +1,47 @@
+name: hackathon-2-phase-2
+version: "2.0"
+structure:
+  specs_dir: specs
+  features_dir: specs/features
+  api_dir: specs/api
+  database_dir: specs/database
+  ui_dir: specs/ui
+  history_dir: history/prompts
+
+phases:
+  - name: phase-1-console
+    features:
+      - task-crud-console
+    status: complete
+
+  - name: phase-2-web
+    features:
+      - task-crud-web
+      - authentication
+      - api-integration
+    status: in-progress
+
+  - name: phase-3-chatbot
+    features:
+      - ai-chatbot
+      - nlp-tasks
+    status: planned
+
+  - name: phase-4-kubernetes
+    features:
+      - containerization
+      - orchestration
+    status: planned
+
+  - name: phase-5-cloud-scale
+    features:
+      - event-streaming
+      - distributed-system
+    status: planned
+
+technologies:
+  frontend: "Next.js 16+"
+  backend: "FastAPI"
+  database: "Neon Serverless PostgreSQL"
+  auth: "Better Auth with JWT"
+  orm: "SQLModel"
