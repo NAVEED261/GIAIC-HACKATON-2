@@ -6,6 +6,7 @@ Phase-2: Backend Agent - Database Agent collaboration
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
+from pydantic import ConfigDict
 
 
 class Task(SQLModel, table=True):
@@ -24,6 +25,8 @@ class Task(SQLModel, table=True):
         completed_at: Task completion timestamp (optional, nullable)
         deleted_at: Soft delete timestamp (optional, nullable)
     """
+
+    model_config = ConfigDict(from_attributes=True)
 
     # Primary Key
     id: Optional[int] = Field(default=None, primary_key=True, description="Auto-increment task ID")
@@ -80,28 +83,13 @@ class Task(SQLModel, table=True):
         description="Soft delete timestamp (for soft deletes)"
     )
 
-    class Config:
-        """SQLModel configuration"""
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "user_id": "user_123",
-                "title": "Buy groceries",
-                "description": "Milk, eggs, bread",
-                "status": "Pending",
-                "priority": "Medium",
-                "created_at": "2025-12-14T10:00:00Z",
-                "updated_at": "2025-12-14T10:00:00Z",
-                "completed_at": None,
-                "deleted_at": None
-            }
-        }
-
 
 class TaskResponse(SQLModel):
     """
     Response schema for task data in API responses
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: str
     title: str
@@ -111,21 +99,6 @@ class TaskResponse(SQLModel):
     created_at: datetime
     updated_at: datetime
     completed_at: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "user_id": "user_123",
-                "title": "Buy groceries",
-                "description": "Milk, eggs, bread",
-                "status": "Pending",
-                "priority": "Medium",
-                "created_at": "2025-12-14T10:00:00Z",
-                "updated_at": "2025-12-14T10:00:00Z",
-                "completed_at": None
-            }
-        }
 
 
 class TaskCreate(SQLModel):

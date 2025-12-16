@@ -6,7 +6,7 @@ Phase-2: Backend Agent - Database Agent collaboration
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
-from pydantic import EmailStr
+from pydantic import EmailStr, ConfigDict
 
 
 class User(SQLModel, table=True):
@@ -24,8 +24,10 @@ class User(SQLModel, table=True):
         last_login_at: Last login timestamp (optional, nullable)
     """
 
+    model_config = ConfigDict(from_attributes=True)
+
     # Primary Key
-    id: str = Field(primary_key=True, description="Unique user identifier")
+    id: str | None = Field(default=None, primary_key=True, description="Unique user identifier")
 
     # Required Fields
     email: EmailStr = Field(unique=True, index=True, description="User email (unique)")
@@ -49,27 +51,14 @@ class User(SQLModel, table=True):
         description="Last login timestamp"
     )
 
-    class Config:
-        """SQLModel configuration"""
-        json_schema_extra = {
-            "example": {
-                "id": "user_123",
-                "email": "user@example.com",
-                "name": "John Doe",
-                "password_hash": "$2b$12$...",
-                "created_at": "2025-12-14T10:00:00Z",
-                "updated_at": "2025-12-14T10:00:00Z",
-                "is_active": True,
-                "last_login_at": None
-            }
-        }
-
 
 class UserResponse(SQLModel):
     """
     Response schema for user data (excludes password_hash)
     Used for API responses to avoid exposing password hashes
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     email: str
     name: str
@@ -77,16 +66,3 @@ class UserResponse(SQLModel):
     updated_at: datetime
     is_active: bool
     last_login_at: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "user_123",
-                "email": "user@example.com",
-                "name": "John Doe",
-                "created_at": "2025-12-14T10:00:00Z",
-                "updated_at": "2025-12-14T10:00:00Z",
-                "is_active": True,
-                "last_login_at": None
-            }
-        }
