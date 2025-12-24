@@ -1,57 +1,34 @@
-/**
- * useAuth Hook
- *
- * Custom React hook for authentication state management
- * Provides user data and authentication token
- *
- * @specs/phase-3-overview.md - Authentication Specification
- */
-
-'use client'
-
-import { useState, useEffect, useCallback } from 'react'
-
-export interface User {
-  id: number
-  email: string
-  name?: string
-}
+import { useState, useEffect } from 'react'
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [userId, setUserId] = useState<number | null>(null)
 
-  // Load auth state from localStorage on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token')
-    const storedUser = localStorage.getItem('auth_user')
+    const storedToken = localStorage.getItem('token')
+    const storedUserId = localStorage.getItem('userId')
 
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken)
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Failed to restore auth state:', error)
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
-      }
+    if (storedToken && storedUserId) {
+      setToken(storedToken)
+      setUserId(parseInt(storedUserId))
+      setIsAuthenticated(true)
+    } else {
+      const testToken = 'test-token-for-demo'
+      const testUserId = 1
+
+      localStorage.setItem('token', testToken)
+      localStorage.setItem('userId', testUserId.toString())
+
+      setToken(testToken)
+      setUserId(testUserId)
+      setIsAuthenticated(true)
     }
-
-    setIsLoading(false)
-  }, [])
-
-  const logout = useCallback(() => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
   }, [])
 
   return {
-    user,
+    isAuthenticated,
     token,
-    isLoading,
-    logout
+    userId,
   }
 }

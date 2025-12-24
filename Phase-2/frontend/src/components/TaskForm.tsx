@@ -111,7 +111,7 @@ export default function TaskForm({
               setValidationErrors({ ...validationErrors, title: '' })
             }
           }}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-gray-900 bg-white ${
             validationErrors.title
               ? 'border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:ring-blue-500'
@@ -144,7 +144,7 @@ export default function TaskForm({
               setValidationErrors({ ...validationErrors, description: '' })
             }
           }}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-gray-900 bg-white ${
             validationErrors.description
               ? 'border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:ring-blue-500'
@@ -175,7 +175,7 @@ export default function TaskForm({
               priority: e.target.value as TaskPriority,
             })
           }
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
           disabled={isLoading}
         >
           <option value="low">🟢 Low Priority</option>
@@ -199,7 +199,7 @@ export default function TaskForm({
               setValidationErrors({ ...validationErrors, due_date: '' })
             }
           }}
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-gray-900 bg-white ${
             validationErrors.due_date
               ? 'border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:ring-blue-500'
