@@ -7,11 +7,6 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   },
 
-  // ESLint configuration
-  eslint: {
-    dirs: ['src', 'pages', 'components', 'lib', 'utils'],
-  },
-
   // Headers for security
   async headers() {
     return [
@@ -35,16 +30,6 @@ const nextConfig = {
     ];
   },
 
-  // Redirect configuration
-  async redirects() {
-    return [
-      {
-        source: '/dashboard',
-        destination: '/',
-        permanent: false,
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;
