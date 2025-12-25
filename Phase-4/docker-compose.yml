@@ -1,0 +1,75 @@
+# ============================================
+# Phase-4: Docker Compose for Local Testing
+# Tests containers before Kubernetes deployment
+# ============================================
+
+version: '3.8'
+
+services:
+  # Frontend Service (Next.js)
+  frontend:
+    build:
+      context: ../
+      dockerfile: Phase-4/docker/frontend/Dockerfile
+    container_name: todo-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - todo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # Backend Service (FastAPI)
+  backend:
+    build:
+      context: ../
+      dockerfile: Phase-4/docker/backend/Dockerfile
+    container_name: todo-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHON_ENV=production
+      - CORS_ORIGINS=*
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-min-32-chars}
+    networks:
+      - todo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+
+networks:
+  todo-network:
+    driver: bridge
+    name: todo-network
+
+# Usage:
+# 1. Set environment variables:
+#    export ANTHROPIC_API_KEY=your-key
+#    export OPENAI_API_KEY=your-key
+#
+# 2. Build and run:
+#    docker-compose -f Phase-4/docker-compose.yml up --build
+#
+# 3. Access:
+#    Frontend: http://localhost:3000
+#    Backend: http://localhost:8000
+#
+# 4. Stop:
+#    docker-compose -f Phase-4/docker-compose.yml down

@@ -1,0 +1,32 @@
+# Phase-4 Backend Requirements
+# Compatible versions for Docker/Kubernetes deployment
+
+# Core Framework - Updated to support anyio>=4.x
+fastapi>=0.109.0
+uvicorn[standard]>=0.25.0
+
+# Database
+sqlmodel>=0.0.14
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+alembic>=1.12.1
+
+# AI Libraries
+anthropic>=0.18.0
+openai>=1.12.0
+# MCP - Skip for now as it has complex deps, Phase-3 chatbot works without it for basic features
+
+# Pydantic
+pydantic>=2.5.0,<3.0.0
+pydantic-settings>=2.1.0
+
+# Utilities
+python-dotenv>=1.0.0
+pytz>=2023.3
+PyJWT>=2.8.0
+passlib[bcrypt]>=1.7.4
+httpx>=0.25.0
+
+# Testing (optional, can be removed for production)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0

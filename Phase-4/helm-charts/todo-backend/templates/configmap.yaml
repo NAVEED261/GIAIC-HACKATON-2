@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo-backend.fullname" . }}-config
+  labels:
+    {{- include "todo-backend.labels" . | nindent 4 }}
+data:
+  PYTHON_ENV: {{ .Values.config.pythonEnv | quote }}
+  CORS_ORIGINS: {{ .Values.config.corsOrigins | quote }}
+  {{- if .Values.config.databaseUrl }}
+  DATABASE_URL: {{ .Values.config.databaseUrl | quote }}
+  {{- end }}
