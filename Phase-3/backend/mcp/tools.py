@@ -31,7 +31,7 @@ async def add_task(
 
     Returns: {task_id, status, title}
     """
-    from Phase_2.backend.models.task import Task
+    from models.task import Task
 
     try:
         task = Task(
@@ -69,7 +69,7 @@ async def list_tasks(
 
     Returns: Array of tasks
     """
-    from Phase_2.backend.models.task import Task
+    from models.task import Task
 
     try:
         query = select(Task).where(Task.user_id == user_id)
@@ -117,7 +117,7 @@ async def update_task(
 
     Returns: {task_id, status}
     """
-    from Phase_2.backend.models.task import Task
+    from models.task import Task
 
     try:
         task = session.exec(
@@ -160,7 +160,7 @@ async def delete_task(
 
     Returns: {task_id, status}
     """
-    from Phase_2.backend.models.task import Task
+    from models.task import Task
 
     try:
         task = session.exec(
@@ -197,7 +197,7 @@ async def complete_task(
 
     Returns: {task_id, status}
     """
-    from Phase_2.backend.models.task import Task
+    from models.task import Task
 
     try:
         task = session.exec(

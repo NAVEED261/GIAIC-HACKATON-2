@@ -8,7 +8,7 @@ Stores both user and assistant messages for full context.
 """
 
 from datetime import datetime
-from typing import Optional, Literal
+from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -23,8 +23,8 @@ class Message(SQLModel, table=True):
 
     id: Optional[int] = Field(default=None, primary_key=True)
     conversation_id: int = Field(foreign_key="conversation.id", index=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    role: Literal["user", "assistant"] = Field(index=True)
+    user_id: int = Field(index=True)  # From JWT token
+    role: str = Field(index=True)  # 'user' or 'assistant'
     content: str = Field(min_length=1, max_length=4000)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
 
@@ -52,7 +52,7 @@ class MessageRead(SQLModel):
     id: int
     conversation_id: int
     user_id: int
-    role: Literal["user", "assistant"]
+    role: str  # 'user' or 'assistant'
     content: str
     created_at: datetime
 
@@ -61,5 +61,5 @@ class MessageCreate(SQLModel):
     """Schema for creating message."""
     conversation_id: int
     user_id: int
-    role: Literal["user", "assistant"]
+    role: str  # 'user' or 'assistant'
     content: str

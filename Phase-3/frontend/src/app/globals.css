@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer utilities {
   @keyframes fade-in {
@@ -25,10 +23,16 @@
   box-sizing: border-box;
 }
 
+
 html,
 body {
   height: 100%;
   width: 100%;
+  background: linear-gradient(120deg, #0f172a 0%, #312e81 60%, #a21caf 100%);
+  background-attachment: fixed;
+  color: #ffffff;
+  box-shadow: 0 0 80px 0 #0f172a inset;
+  padding: 18px 0 18px 0;
 }
 
 #__next {

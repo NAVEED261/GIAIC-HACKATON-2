@@ -13,9 +13,13 @@ from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from db import create_db_and_tables, get_session, engine
-from models import Conversation, Message
+from models import Conversation, Message, Task, User
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,18 +32,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
-CORS_ORIGINS = os.getenv(
-    "CORS_ORIGINS",
-    "http://localhost:3000,http://localhost:8000"
-).split(",")
-
+# Add CORS middleware - Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Create database tables on startup
@@ -58,10 +58,12 @@ def health_check():
 
 # Import routes
 try:
-    from routes import chat, conversations
+    from routes import chat, conversations, auth, tasks
     app.include_router(chat.router)
     app.include_router(conversations.router)
-    logger.info("Loaded chat and conversation routes")
+    app.include_router(auth.router)
+    app.include_router(tasks.router)
+    logger.info("Loaded all routes: chat, conversations, auth, tasks")
 except ImportError as e:
     logger.warning(f"Could not load routes: {e}")
 

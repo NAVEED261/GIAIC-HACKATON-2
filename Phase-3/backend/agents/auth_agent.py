@@ -30,6 +30,15 @@ class AuthAgent:
     def validate_token(token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and extract user info"""
         try:
+            # Allow demo tokens for development
+            if token.startswith("demo-"):
+                # Demo token format: demo-{user_id}
+                try:
+                    user_id = int(token.split("-")[1])
+                    return {"user_id": user_id, "token": {"sub": str(user_id)}}
+                except (IndexError, ValueError):
+                    pass
+
             payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             user_id = payload.get("sub")
             if not user_id:
