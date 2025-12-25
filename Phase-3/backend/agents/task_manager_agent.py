@@ -28,7 +28,7 @@ class TaskManagerAgent:
         tools: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """Execute MCP tools in sequence"""
-        from Phase_3.backend.mcp.tools import (
+        from mcp.tools import (
             add_task, list_tasks, update_task, delete_task, complete_task
         )
 
@@ -78,7 +78,7 @@ class TaskManagerAgent:
         task_id: int
     ) -> bool:
         """Verify user owns the task"""
-        from Phase_2.backend.models.task import Task
+        from models.task import Task
         from sqlmodel import select
 
         try:

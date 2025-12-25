@@ -30,25 +30,25 @@ export default function ConversationsList({
   onSelectConversation,
   onDeleteConversation
 }: ConversationsListProps) {
-  const { user, token } = useAuth()
+  const { userId, token } = useAuth()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user && token) {
+    if (userId && token) {
       loadConversations()
     }
-  }, [user, token])
+  }, [userId, token])
 
   const loadConversations = async () => {
-    if (!user || !token) return
+    if (!userId || !token) return
 
     setIsLoading(true)
     setError(null)
 
     try {
-      const data = await chatClient.listConversations(user.id, token)
+      const data: any = await chatClient.listConversations(userId, token)
       setConversations(data.conversations || [])
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load conversations'
@@ -61,14 +61,14 @@ export default function ConversationsList({
   const handleDelete = async (conversationId: number, e: React.MouseEvent) => {
     e.stopPropagation()
 
-    if (!user || !token) return
+    if (!userId || !token) return
 
     if (!window.confirm('Are you sure you want to delete this conversation?')) {
       return
     }
 
     try {
-      await chatClient.deleteConversation(user.id, conversationId, token)
+      await chatClient.deleteConversation(userId, conversationId, token)
       setConversations(conversations.filter(c => c.id !== conversationId))
       onDeleteConversation?.(conversationId)
     } catch (err) {
@@ -95,18 +95,18 @@ export default function ConversationsList({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
-        <div className="text-gray-500">Loading conversations...</div>
+        <div className="text-white/50">Loading conversations...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-700 text-sm">{error}</p>
+      <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+        <p className="text-red-200 text-sm">{error}</p>
         <button
           onClick={loadConversations}
-          className="mt-2 text-sm text-red-600 hover:text-red-700 font-medium"
+          className="mt-2 text-sm text-red-400 hover:text-red-300 font-medium"
         >
           Retry
         </button>
@@ -117,9 +117,9 @@ export default function ConversationsList({
   if (conversations.length === 0) {
     return (
       <div className="flex items-center justify-center p-4 text-center">
-        <div className="text-gray-500">
+        <div className="text-white/50">
           <p className="text-sm">No conversations yet</p>
-          <p className="text-xs text-gray-400 mt-1">Start a new chat to create one</p>
+          <p className="text-xs text-white/40 mt-1">Start a new chat to create one</p>
         </div>
       </div>
     )
@@ -131,24 +131,24 @@ export default function ConversationsList({
         <div
           key={conversation.id}
           onClick={() => onSelectConversation?.(conversation.id)}
-          className="p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition group"
+          className="p-3 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 cursor-pointer transition group"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-white truncate">
                 Conversation #{conversation.id}
               </p>
-              <p className="text-xs text-gray-600 truncate mt-1">
+              <p className="text-xs text-white/60 truncate mt-1">
                 {conversation.preview}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-white/40 mt-1">
                 {conversation.message_count} messages • {formatDate(conversation.updated_at)}
               </p>
             </div>
 
             <button
               onClick={(e) => handleDelete(conversation.id, e)}
-              className="opacity-0 group-hover:opacity-100 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded transition"
+              className="opacity-0 group-hover:opacity-100 px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/20 rounded transition"
               title="Delete conversation"
             >
               Delete

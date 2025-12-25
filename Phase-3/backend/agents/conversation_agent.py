@@ -30,7 +30,7 @@ class ConversationAgent:
         conversation_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """Get existing conversation or create new one"""
-        from Phase_3.backend.models.conversation import Conversation
+        from models.conversation import Conversation
 
         try:
             if conversation_id:
@@ -62,17 +62,22 @@ class ConversationAgent:
     @staticmethod
     async def fetch_message_history(
         session: Session,
-        conversation_id: int
+        conversation_id: int,
+        limit: Optional[int] = None,
+        offset: int = 0
     ) -> List[Dict[str, Any]]:
         """Fetch full message history for context"""
-        from Phase_3.backend.models.message import Message
+        from models.message import Message
 
         try:
-            messages = session.exec(
-                select(Message)
-                .where(Message.conversation_id == conversation_id)
-                .order_by(Message.created_at)
-            ).all()
+            query = select(Message).where(
+                Message.conversation_id == conversation_id
+            ).order_by(Message.created_at)
+
+            if limit:
+                query = query.limit(limit).offset(offset)
+
+            messages = session.exec(query).all()
 
             history = [
                 {
@@ -96,7 +101,7 @@ class ConversationAgent:
         content: str
     ) -> Dict[str, Any]:
         """Store user message in database"""
-        from Phase_3.backend.models.message import Message
+        from models.message import Message
 
         try:
             message = Message(
@@ -123,7 +128,7 @@ class ConversationAgent:
         content: str
     ) -> Dict[str, Any]:
         """Store assistant message in database"""
-        from Phase_3.backend.models.message import Message
+        from models.message import Message
 
         try:
             message = Message(
@@ -148,7 +153,7 @@ class ConversationAgent:
         user_id: int
     ) -> List[Any]:
         """List all conversations for a user"""
-        from Phase_3.backend.models.conversation import Conversation
+        from models.conversation import Conversation
 
         try:
             conversations = session.exec(
@@ -169,7 +174,7 @@ class ConversationAgent:
         conversation_id: int
     ) -> Optional[Any]:
         """Get a specific conversation"""
-        from Phase_3.backend.models.conversation import Conversation
+        from models.conversation import Conversation
 
         try:
             conversation = session.exec(
@@ -193,8 +198,8 @@ class ConversationAgent:
         user_id: int
     ) -> bool:
         """Delete a conversation and all its messages"""
-        from Phase_3.backend.models.conversation import Conversation
-        from Phase_3.backend.models.message import Message
+        from models.conversation import Conversation
+        from models.message import Message
 
         try:
             # Verify ownership
@@ -228,14 +233,14 @@ class ConversationAgent:
             raise
 
     @staticmethod
-    async def fetch_message_history(
+    async def fetch_message_history_paginated(
         session: Session,
         conversation_id: int,
         limit: Optional[int] = None,
         offset: int = 0
     ) -> List[Any]:
         """Fetch message history with optional pagination"""
-        from Phase_3.backend.models.message import Message
+        from models.message import Message
 
         try:
             query = select(Message).where(

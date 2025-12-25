@@ -4,135 +4,126 @@ import Link from 'next/link'
 
 export default function HeroSection() {
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden pt-20">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+    <section className="relative overflow-hidden">
+      {/* Background blobs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-fuchsia-500/20 blur-3xl" />
+        <div className="absolute top-10 -right-24 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
       </div>
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-screen flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
-          {/* Left Content */}
-          <div className="space-y-8 animate-fade-in">
-            <div>
-              <span className="inline-block px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-full text-sm font-semibold text-purple-300 mb-6">
-                ✨ AI-Powered Task Management
-              </span>
-              <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-4">
-                <span className="bg-gradient-to-r from-purple-300 via-cyan-300 to-purple-300 bg-clip-text text-transparent">
-                  Master Your Tasks
-                </span>
-                <br />
-                <span className="text-slate-100">with AI</span>
-              </h2>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Hero */}
+        <div className="grid items-center gap-10 py-10 lg:grid-cols-2 lg:py-16">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+              AI-Powered Task Management
             </div>
 
-            <p className="text-lg text-slate-400 leading-relaxed max-w-xl">
-              Meet your intelligent task assistant. Powered by advanced AI, our platform helps you manage, organize, and complete your tasks effortlessly using natural language conversations.
+            <h1 className="mt-5 text-4xl font-black leading-tight sm:text-5xl">
+              Master your tasks{' '}
+              <span className="bg-gradient-to-r from-fuchsia-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                like an ecommerce pro
+              </span>
+            </h1>
+
+            <p className="mt-4 text-base text-white/70">
+              Type naturally: “Add task to complete report tomorrow”. Our AI converts your words into real task actions.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/chat"
-                className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/40 hover:shadow-cyan-500/60 transition-all duration-300 transform hover:scale-105 text-center"
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:opacity-95 transition"
               >
-                Start Chat Now
+                Start AI Chat
               </Link>
               <Link
-                href="/signup"
-                className="px-8 py-4 border-2 border-slate-600 hover:border-slate-500 text-slate-300 hover:text-white font-bold rounded-xl backdrop-blur transition-all duration-300 text-center"
+                href="/tasks"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/85 hover:bg-white/10 transition"
               >
-                Learn More
+                Open Tasks
               </Link>
             </div>
 
-            {/* Feature Grid */}
-            <div className="grid grid-cols-2 gap-4 pt-8">
-              <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4 backdrop-blur hover:bg-slate-700/50 transition">
-                <span className="text-2xl mb-2 block">📝</span>
-                <p className="text-sm text-slate-300 font-semibold">Add Tasks</p>
-                <p className="text-xs text-slate-500 mt-1">Just describe what you need</p>
+            {/* Trust / stats strip */}
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-2xl font-extrabold">1000+</div>
+                <div className="text-xs text-white/60">Active Users</div>
               </div>
-              <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4 backdrop-blur hover:bg-slate-700/50 transition">
-                <span className="text-2xl mb-2 block">📋</span>
-                <p className="text-sm text-slate-300 font-semibold">Organize</p>
-                <p className="text-xs text-slate-500 mt-1">Smart categorization</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-2xl font-extrabold">10K+</div>
+                <div className="text-xs text-white/60">Tasks Completed</div>
               </div>
-              <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4 backdrop-blur hover:bg-slate-700/50 transition">
-                <span className="text-2xl mb-2 block">✔️</span>
-                <p className="text-sm text-slate-300 font-semibold">Track Progress</p>
-                <p className="text-xs text-slate-500 mt-1">Stay on top of goals</p>
-              </div>
-              <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4 backdrop-blur hover:bg-slate-700/50 transition">
-                <span className="text-2xl mb-2 block">🚀</span>
-                <p className="text-sm text-slate-300 font-semibold">Achieve More</p>
-                <p className="text-xs text-slate-500 mt-1">AI-powered insights</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-2xl font-extrabold">99%</div>
+                <div className="text-xs text-white/60">Satisfaction</div>
               </div>
             </div>
           </div>
 
-          {/* Right Content - Visual */}
-          <div className="hidden lg:flex items-center justify-center">
-            <div className="relative w-full h-96 flex items-center justify-center">
-              {/* Chat Bubble Animation */}
-              <div className="absolute w-64 h-80 bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600/50 rounded-2xl shadow-2xl shadow-purple-500/20 backdrop-blur p-6 space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm">🤖</span>
-                  </div>
-                  <div className="flex-1 bg-slate-600/50 rounded-lg p-3">
-                    <p className="text-xs text-slate-300">I'll help you manage all your tasks efficiently</p>
-                  </div>
-                </div>
+          {/* Right side preview card */}
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold text-white/90">Live Preview</div>
+              <div className="text-xs text-white/50">AI + MCP tools</div>
+            </div>
 
-                <div className="flex gap-3 justify-end">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg p-3 max-w-xs">
-                    <p className="text-xs text-white">Add task: Complete project report</p>
-                  </div>
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm">👤</span>
-                  </div>
-                </div>
+            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+              <div className="text-xs text-white/60">You</div>
+              <div className="mt-1 text-sm">Add task: Complete project report tomorrow</div>
 
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm">🤖</span>
-                  </div>
-                  <div className="flex-1 bg-slate-600/50 rounded-lg p-3">
-                    <p className="text-xs text-slate-300">✅ Task added! Due date set for tomorrow</p>
-                  </div>
-                </div>
+              <div className="mt-4 text-xs text-white/60">Assistant</div>
+              <div className="mt-1 rounded-xl border border-white/10 bg-white/5 p-3 text-sm">
+                ✅ Task added! Due date set for tomorrow.
+              </div>
+            </div>
 
-                <div className="relative pt-4">
-                  <input
-                    type="text"
-                    placeholder="Tell me what to do..."
-                    className="w-full bg-slate-600/50 border border-slate-500/50 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none"
-                    disabled
-                  />
-                </div>
+            {/* Feature cards */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-semibold">Add Tasks</div>
+                <div className="mt-1 text-xs text-white/60">Describe what you need</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-semibold">Smart Search</div>
+                <div className="mt-1 text-xs text-white/60">Find tasks instantly</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-semibold">Track Progress</div>
+                <div className="mt-1 text-xs text-white/60">Pending → Completed</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-sm font-semibold">AI Assistance</div>
+                <div className="mt-1 text-xs text-white/60">Natural language control</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats/Trust Section */}
-        <div className="mt-20 pt-20 border-t border-slate-700/50 grid grid-cols-3 gap-8 text-center">
-          <div>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-cyan-300 bg-clip-text text-transparent">1000+</p>
-            <p className="text-slate-400 text-sm mt-2">Active Users</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-cyan-300 bg-clip-text text-transparent">10K+</p>
-            <p className="text-slate-400 text-sm mt-2">Tasks Completed</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-cyan-300 bg-clip-text text-transparent">99%</p>
-            <p className="text-slate-400 text-sm mt-2">Satisfaction Rate</p>
+        {/* Secondary sections */}
+        <div className="pb-16">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="text-sm font-semibold">Secure Auth</div>
+              <div className="mt-2 text-sm text-white/70">
+                JWT-based isolation so your tasks stay private.
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="text-sm font-semibold">Stateless Backend</div>
+              <div className="mt-2 text-sm text-white/70">
+                Conversation history is stored in DB, works across restarts.
+              </div>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="text-sm font-semibold">MCP Tools</div>
+              <div className="mt-2 text-sm text-white/70">
+                AI calls tools (add/list/update/delete/complete) instead of direct DB.
+              </div>
+            </div>
           </div>
         </div>
       </div>

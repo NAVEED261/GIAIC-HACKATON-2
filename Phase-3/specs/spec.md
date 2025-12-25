@@ -18,6 +18,7 @@ The AI understands intent and executes appropriate actions.
 ChatKit UI (Frontend)
     ↓
 FastAPI Chat Endpoint (Stateless)
+
     ↓
 ConversationAgent (AI Agent)
     ↓

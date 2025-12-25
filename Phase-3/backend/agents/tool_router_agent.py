@@ -10,12 +10,24 @@ Skills: Natural language intent detection, tool selection, tool chaining
 
 import logging
 import json
+import os
 from typing import List, Dict, Any
-from openai import AsyncOpenAI
+from anthropic import Anthropic
 
 logger = logging.getLogger(__name__)
 
-client = AsyncOpenAI()
+# Lazy-load client to ensure ANTHROPIC_API_KEY is set
+_client = None
+
+def get_client():
+    """Get or create Anthropic client"""
+    global _client
+    if _client is None:
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+        _client = Anthropic(api_key=api_key)
+    return _client
 
 # Intent patterns for tool selection
 INTENT_PATTERNS = {
@@ -30,7 +42,7 @@ INTENT_PATTERNS = {
 class ToolRouterAgent:
     """
     Routes user messages to appropriate MCP tools.
-    Uses GPT-4 for natural language understanding.
+    Uses Claude 3.5 Sonnet for natural language understanding.
     """
 
     @staticmethod
@@ -49,7 +61,7 @@ class ToolRouterAgent:
                 for msg in conversation_history[-5:]  # Last 5 messages
             ])
 
-            # Create prompt for GPT-4
+            # Create prompt for Claude
             system_prompt = """You are an intent classifier for a todo application.
 Classify the user message into one of these actions:
 - add_task: Create a new task
@@ -61,17 +73,16 @@ Classify the user message into one of these actions:
 Respond with JSON: {"action": "action_name", "task_id": task_id_if_applicable, "params": {...}}
 """
 
-            response = await client.chat.completions.create(
-                model="gpt-4",
+            response = get_client().messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=500,
+                system=system_prompt,
                 messages=[
-                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Context:\n{context}\n\nMessage: {user_message}"}
-                ],
-                temperature=0.3,
-                max_tokens=500
+                ]
             )
 
-            intent_response = json.loads(response.choices[0].message.content)
+            intent_response = json.loads(response.content[0].text)
             logger.info(f"Parsed intent: {intent_response['action']}")
             return intent_response
 
@@ -111,17 +122,16 @@ Respond with JSON: {"action": "action_name", "task_id": task_id_if_applicable, "
 Generate a natural, friendly response based on the user request and tool results.
 Keep responses concise and helpful."""
 
-            response = await client.chat.completions.create(
-                model="gpt-4",
+            response = get_client().messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=500,
+                system=system_prompt,
                 messages=[
-                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"User: {user_message}\n\nResults: {json.dumps(tool_results)}"}
-                ],
-                temperature=0.7,
-                max_tokens=500
+                ]
             )
 
-            assistant_response = response.choices[0].message.content
+            assistant_response = response.content[0].text
             logger.info(f"Generated response: {assistant_response[:100]}...")
             return assistant_response
 

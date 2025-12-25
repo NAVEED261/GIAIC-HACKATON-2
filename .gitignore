@@ -78,3 +78,4 @@ build/
 # Archives
 *.zip
 *.tar.gz
+Phase-3/backend/.env

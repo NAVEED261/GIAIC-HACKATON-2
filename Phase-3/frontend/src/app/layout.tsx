@@ -1,8 +1,8 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'Todo Assistant - AI Chat',
-  description: 'Manage your tasks with AI-powered chat',
+  title: 'Fatima Zehra Todo - AI Task Manager',
+  description: 'AI-powered todo system with multi-agent architecture',
 }
 
 export default function RootLayout({
@@ -12,7 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-white">{children}</body>
+      <body className="text-white font-sans antialiased">
+        {children}
+      </body>
     </html>
   )
 }

@@ -1,88 +1,188 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+function AuthButtons() {
+  const router = useRouter()
+  const { isAuthenticated, userName, logout } = useAuth()
+
+  if (isAuthenticated) {
+    return (
+      <div className="hidden md:flex items-center gap-2">
+        <span className="text-sm text-white/70">Hello, {userName}</span>
+        <button
+          onClick={() => {
+            logout()
+            router.push('/')
+          }}
+          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/80 hover:text-white hover:bg-white/10 transition"
+        >
+          Logout
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <nav className="fixed w-full top-0 z-50 bg-gradient-to-r from-slate-900/95 via-slate-900/95 to-slate-900/95 backdrop-blur-xl border-b border-slate-700/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <div className="hidden md:flex items-center gap-2">
+      <Link
+        href="/signin"
+        className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/80 hover:text-white hover:bg-white/10 transition"
+      >
+        Sign in
+      </Link>
+      <Link
+        href="/signup"
+        className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:opacity-95 transition"
+      >
+        Sign up
+      </Link>
+    </div>
+  )
+}
 
-          {/* Left Side - Logo */}
-          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/50 group-hover:shadow-purple-500/75 transition-all duration-300">
-              <span className="text-xl font-bold text-white">✓</span>
+export default function Navbar() {
+  const [open, setOpen] = useState(false)
+  const [q, setQ] = useState('')
+  const router = useRouter()
+  const { isAuthenticated, logout } = useAuth()
+
+  const links = useMemo(
+    () => [
+      { href: '/tasks', label: 'Tasks' },
+      { href: '/chat', label: 'AI Chat' },
+    ],
+    []
+  )
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Roman Urdu: abhi demo ke liye console, baad me /tasks?q=... route kar dena
+    console.log('Search query:', q)
+  }
+
+  return (
+    <nav className="fixed top-0 z-50 w-full bg-gradient-to-r from-[#1e293b] via-[#312e81] to-[#a21caf] shadow-2xl border-b border-white/10 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
+        <div className="flex h-20 items-center gap-6">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-4">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-cyan-500 shadow-xl">
+              <span className="text-xl font-black tracking-widest drop-shadow">FZ</span>
             </div>
-            <span className="text-sm font-semibold text-slate-300 hidden sm:inline">TODO</span>
+            <div className="hidden sm:block">
+              <div className="text-lg font-extrabold bg-gradient-to-r from-cyan-300 to-pink-400 bg-clip-text text-transparent">Fatima Zehra Todo</div>
+              <div className="text-xs text-white/70 font-medium">AI Task Manager</div>
+            </div>
           </Link>
 
-          {/* Center - App Name */}
-          <div className="flex-1 text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-300 via-cyan-300 to-purple-300 bg-clip-text text-transparent">
-              FATIMA ZEHRAA TODO APP
-            </h1>
+          {/* Links (Desktop) */}
+          <div className="hidden lg:flex items-center gap-2 ml-6">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="rounded-xl px-4 py-2 text-base font-semibold text-white/80 hover:text-white hover:bg-white/10 transition shadow-sm"
+              >
+                {l.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Right Side - Auth Buttons (Desktop) */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/tasks"
-              className="px-6 py-2 text-slate-300 hover:text-white font-semibold transition-colors duration-200 border border-slate-600/50 hover:border-slate-500/75 rounded-lg backdrop-blur"
-            >
-              📋 Tasks
-            </Link>
-            <Link
-              href="/signin"
-              className="px-6 py-2 text-slate-300 hover:text-white font-semibold transition-colors duration-200 border border-slate-600/50 hover:border-slate-500/75 rounded-lg backdrop-blur"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-200 transform hover:scale-105"
-            >
-              Sign Up
-            </Link>
-          </div>
+          {/* Search (Desktop) */}
+          <form onSubmit={onSearch} className="ml-auto hidden md:block w-full max-w-md">
+            <div className="relative">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder='Search tasks… e.g. "report", "meeting"'
+                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 pr-24 text-base text-white placeholder:text-white/40 outline-none focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/20 shadow-inner"
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow hover:opacity-90 transition"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {/* Auth Buttons (Desktop) */}
+          <AuthButtons />
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5 hover:bg-slate-700/50 rounded-lg transition"
+            onClick={() => setOpen((v) => !v)}
+            className="md:hidden ml-auto grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/10 hover:bg-white/20 transition shadow"
+            aria-label="Open menu"
           >
-            <span className={`w-6 h-0.5 bg-slate-300 transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-            <span className={`w-6 h-0.5 bg-slate-300 transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`w-6 h-0.5 bg-slate-300 transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+            <div className="flex flex-col gap-1">
+              <span className={`h-0.5 w-7 bg-white transition ${open ? 'rotate-45 translate-y-2' : ''}`} />
+              <span className={`h-0.5 w-7 bg-white transition ${open ? 'opacity-0' : ''}`} />
+              <span className={`h-0.5 w-7 bg-white transition ${open ? '-rotate-45 -translate-y-2' : ''}`} />
+            </div>
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden pb-4 space-y-2 animate-fade-in">
-            <Link
-              href="/tasks"
-              className="block w-full px-4 py-2 text-slate-300 hover:text-white font-semibold transition-colors duration-200 border border-slate-600/50 rounded-lg backdrop-blur text-center"
-              onClick={() => setIsOpen(false)}
-            >
-              📋 Tasks
-            </Link>
-            <Link
-              href="/signin"
-              className="block w-full px-4 py-2 text-slate-300 hover:text-white font-semibold transition-colors duration-200 border border-slate-600/50 rounded-lg backdrop-blur text-center"
-              onClick={() => setIsOpen(false)}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="block w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg shadow-cyan-500/30 text-center transition-all duration-200"
-              onClick={() => setIsOpen(false)}
-            >
-              Sign Up
-            </Link>
+        {/* Mobile Panel */}
+        {open && (
+          <div className="md:hidden pb-6 animate-fade-in">
+            <form onSubmit={onSearch} className="mt-2">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search tasks…"
+                className="w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/40 outline-none focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/20 shadow-inner"
+              />
+            </form>
+
+            <div className="mt-4 grid gap-3">
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-base font-semibold text-white/90 hover:bg-white/20 transition shadow"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    logout()
+                    setOpen(false)
+                    router.push('/')
+                  }}
+                  className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-center text-base font-semibold text-white/90 hover:bg-white/20 transition shadow"
+                >
+                  Logout
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/signin"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-center text-base font-semibold text-white/90 hover:bg-white/20 transition shadow"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setOpen(false)}
+                    className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-center text-base font-semibold text-white shadow-lg shadow-cyan-500/20 hover:opacity-95 transition"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

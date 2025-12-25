@@ -1,4 +1,4 @@
 """Routes module"""
-from . import chat, conversations
+from . import chat, conversations, auth, tasks
 
-__all__ = ["chat", "conversations"]
+__all__ = ["chat", "conversations", "auth", "tasks"]
