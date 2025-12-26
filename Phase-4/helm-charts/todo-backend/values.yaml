@@ -1,0 +1,93 @@
+# Todo Backend - Helm Values
+# Phase-4 Kubernetes Deployment
+
+# Number of replicas
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: todo-backend
+  tag: "v1"
+  pullPolicy: IfNotPresent
+
+# Container port
+containerPort: 8000
+
+# Service configuration
+service:
+  type: NodePort
+  port: 8000
+  targetPort: 8000
+  nodePort: 30800
+
+# Resource limits and requests
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# Environment configuration
+config:
+  pythonEnv: "production"
+  corsOrigins: "*"
+  databaseUrl: ""  # Set via secret or external
+
+# Secrets (set these at install time with --set)
+# Example: helm install todo-backend ./todo-backend --set secrets.anthropicApiKey=xxx
+secrets:
+  anthropicApiKey: ""
+  openaiApiKey: ""
+  jwtSecretKey: "your-jwt-secret-key-min-32-chars"
+
+# Health check configuration
+healthCheck:
+  path: "/health"
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1001
+
+# Container security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Service account
+serviceAccount:
+  create: false
+  name: ""
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: api.todo.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

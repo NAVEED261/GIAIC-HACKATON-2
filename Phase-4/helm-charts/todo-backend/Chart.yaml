@@ -1,0 +1,18 @@
+apiVersion: v2
+name: todo-backend
+description: Todo Chatbot Backend - FastAPI Application with AI Integration for Phase-4 Kubernetes Deployment
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - todo
+  - backend
+  - fastapi
+  - chatbot
+  - ai
+  - phase-4
+maintainers:
+  - name: GIAIC Hackathon Team
+home: https://github.com/NAVEED261/GIAIC-HACKATON-2
+sources:
+  - https://github.com/NAVEED261/GIAIC-HACKATON-2/tree/master/Phase-4

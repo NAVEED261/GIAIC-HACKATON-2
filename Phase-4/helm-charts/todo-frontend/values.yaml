@@ -1,0 +1,85 @@
+# Todo Frontend - Helm Values
+# Phase-4 Kubernetes Deployment
+
+# Number of replicas
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: todo-frontend
+  tag: "v1"
+  pullPolicy: IfNotPresent
+
+# Container port
+containerPort: 3000
+
+# Service configuration
+service:
+  type: NodePort
+  port: 80
+  targetPort: 3000
+  nodePort: 30080
+
+# Resource limits and requests
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# Environment configuration
+config:
+  nodeEnv: "production"
+  apiUrl: "http://todo-backend-service:8000"
+
+# Health check configuration
+healthCheck:
+  path: "/"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1001
+
+# Container security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Service account
+serviceAccount:
+  create: false
+  name: ""
+
+# Ingress configuration (optional)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: todo.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
