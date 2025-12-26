@@ -49,10 +49,10 @@ export function useTasks(): UseTasksReturn {
 
         const response = await apiClient
           .getClient()
-          .get<TaskListResponse>(`/api/tasks?${params.toString()}`)
+          .get<Task[]>(`/api/tasks?${params.toString()}`)
 
-        setTasks(response.data.items)
-        setTotal(response.data.total)
+        const tasksData = Array.isArray(response.data) ? response.data : []; setTasks(tasksData)
+        setTotal(tasksData.length)
         setIsLoading(false)
       } catch (err: any) {
         const errorMsg =

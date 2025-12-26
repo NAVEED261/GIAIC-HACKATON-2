@@ -30,7 +30,7 @@ class User(SQLModel, table=True):
     id: str | None = Field(default=None, primary_key=True, description="Unique user identifier")
 
     # Required Fields
-    email: EmailStr = Field(unique=True, index=True, description="User email (unique)")
+    email: str = Field(unique=True, index=True, description="User email (unique)")
     name: str = Field(min_length=1, max_length=255, description="User full name")
     password_hash: str = Field(description="Bcrypt hashed password")
 

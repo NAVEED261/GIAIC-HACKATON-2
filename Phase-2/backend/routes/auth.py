@@ -101,12 +101,20 @@ class LoginRequest(BaseModel):
         }
 
 
+class UserInResponse(BaseModel):
+    """User data in response."""
+    id: str
+    email: str
+    name: str
+
+
 class LoginResponse(BaseModel):
     """User login response."""
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
+    user: UserInResponse = None
 
     class Config:
         schema_extra = {
@@ -135,6 +143,7 @@ class TokenRefreshResponse(BaseModel):
     """Token refresh response."""
     access_token: str
     expires_in: int
+    user: UserInResponse = None
 
     class Config:
         schema_extra = {
@@ -363,6 +372,7 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
             access_token=access_token,
             refresh_token=refresh_token,
             expires_in=900,  # 15 minutes in seconds
+            user=UserInResponse(id=user.id, email=user.email, name=user.name),
         )
 
     except HTTPException:
@@ -514,6 +524,7 @@ async def refresh_token(request: TokenRefreshRequest, db: Session = Depends(get_
         return TokenRefreshResponse(
             access_token=access_token,
             expires_in=900,  # 15 minutes in seconds
+            user=UserInResponse(id=user.id, email=user.email, name=user.name),
         )
 
     except HTTPException:

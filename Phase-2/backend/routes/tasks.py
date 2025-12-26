@@ -126,8 +126,18 @@ async def list_tasks(
         query = db.query(Task).filter(Task.user_id == current_user.id)
 
         # Apply status filter if provided
+        # Map frontend status values (lowercase) to backend status values (Title Case)
         if status:
-            query = query.filter(Task.status == status)
+            status_map = {
+                "pending": "Pending",
+                "in_progress": "In Progress",
+                "completed": "Completed",
+                "Pending": "Pending",
+                "In Progress": "In Progress",
+                "Completed": "Completed",
+            }
+            mapped_status = status_map.get(status, status)
+            query = query.filter(Task.status == mapped_status)
 
         # Determine sort column
         if sort_by == "title":
@@ -248,7 +258,7 @@ async def create_task(
             user_id=current_user.id,
             title=task_create.title,
             description=task_create.description,
-            status=task_create.status or "Pending",
+            status="Pending",
             priority=task_create.priority or "Medium",
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),

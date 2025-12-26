@@ -17,6 +17,8 @@ The application is organized following these principles:
 5. Utilities: Helpers and middleware (if needed)
 """
 
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import logging
 from fastapi import FastAPI
