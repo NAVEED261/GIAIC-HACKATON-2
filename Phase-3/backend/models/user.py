@@ -11,17 +11,10 @@ Implements @specs/phase-3-overview.md - Authentication
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime
 from typing import Optional, List, TYPE_CHECKING
-from passlib.context import CryptContext
+import bcrypt
 
 if TYPE_CHECKING:
     from .task import Task
-
-# Password hashing context - use argon2 as fallback if bcrypt has issues
-try:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-except Exception:
-    # Fallback to argon2 if bcrypt fails
-    pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 class User(SQLModel, table=True):
@@ -40,12 +33,12 @@ class User(SQLModel, table=True):
 
     def verify_password(self, password: str) -> bool:
         """Verify a password against the hashed password"""
-        return pwd_context.verify(password, self.hashed_password)
+        return bcrypt.checkpw(password.encode('utf-8'), self.hashed_password.encode('utf-8'))
 
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password using bcrypt"""
-        return pwd_context.hash(password)
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 class UserCreate(SQLModel):

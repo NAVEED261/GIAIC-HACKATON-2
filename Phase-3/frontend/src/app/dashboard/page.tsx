@@ -24,7 +24,8 @@ export default function DashboardPage() {
 
       try {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/${userId}/tasks`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiUrl}/api/${userId}/tasks`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

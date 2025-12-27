@@ -1,184 +1,207 @@
-# Phase-4: Kubernetes Deployment
+# Phase-4: Local Kubernetes Deployment
 
-**Status**: 📋 **PLANNED**
+**Status**: **DEPLOYED ✅**
 
-This folder will contain Phase-4 of the Hackathon-2 project - containerizing and deploying the system using Kubernetes.
+Deploy Phase-3 Todo Chatbot on local Kubernetes cluster using Minikube, Helm Charts, and AI-assisted DevOps tools.
 
-## Vision
+## Quick Start
 
-Scale Phase-3 AI-native todo system using:
-- Docker containerization
-- Kubernetes orchestration
-- Helm charts for deployment
-- Minikube for local testing
-- Cloud-ready infrastructure
+### Prerequisites
+- Docker Desktop v28.3.2+ (RUNNING)
+- Minikube v1.37.0+ (RUNNING)
+- Helm 3.x
+- kubectl CLI
 
-## Expected Structure (Coming Soon)
+### Verify Environment
+```bash
+# Check Docker
+docker --version
+
+# Check Minikube
+minikube status
+
+# Check kubectl
+kubectl version --client
+```
+
+### Build Docker Images
+```bash
+cd "D:\PIAIC HACKATON PRACTICE\GIAIC-HACKATON-2"
+
+# Build frontend
+docker build -t todo-frontend:v1 -f Phase-4/docker/frontend/Dockerfile .
+
+# Build backend
+docker build -t todo-backend:v1 -f Phase-4/docker/backend/Dockerfile .
+```
+
+### Load Images to Minikube
+```bash
+minikube image load todo-frontend:v1
+minikube image load todo-backend:v1
+```
+
+### Deploy with Helm
+```bash
+# Create namespace
+kubectl apply -f Phase-4/k8s/namespace.yaml
+
+# Deploy backend (set your API keys)
+helm install todo-backend ./Phase-4/helm-charts/todo-backend -n todo \
+  --set secrets.anthropicApiKey=$ANTHROPIC_API_KEY \
+  --set secrets.openaiApiKey=$OPENAI_API_KEY
+
+# Deploy frontend
+helm install todo-frontend ./Phase-4/helm-charts/todo-frontend -n todo
+```
+
+### Access Application
+```bash
+# Get frontend URL
+minikube service todo-frontend-service -n todo --url
+
+# Get backend URL
+minikube service todo-backend-service -n todo --url
+```
+
+## Technology Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Containerization | Docker | Package applications |
+| Orchestration | Kubernetes (Minikube) | Container orchestration |
+| Package Manager | Helm Charts | K8s package management |
+| AI DevOps | kubectl-ai, Docker AI | AI-assisted operations |
+
+## Project Structure
 
 ```
 Phase-4/
 ├── specs/
-│   ├── phase-4-overview.md
-│   ├── features/
-│   │   ├── containerization.md
-│   │   ├── kubernetes-deployment.md
-│   │   └── helm-charts.md
-│   ├── infrastructure/
-│   │   ├── cluster-design.md
-│   │   └── networking.md
-│   └── operations/
-│       ├── deployment.md
-│       └── monitoring.md
+│   ├── spec.md          # Specification
+│   ├── plan.md          # Implementation plan
+│   └── tasks.md         # Task breakdown
+│
+├── agents/              # AI SubAgents
+│   ├── docker-agent/
+│   ├── kubernetes-agent/
+│   ├── helm-agent/
+│   └── aiops-agent/
 │
 ├── docker/
-│   ├── Dockerfile.backend
-│   ├── Dockerfile.frontend
-│   ├── docker-compose.yml
-│   └── .dockerignore
+│   ├── frontend/
+│   │   └── Dockerfile   # Multi-stage Next.js build
+│   └── backend/
+│       ├── Dockerfile   # Optimized FastAPI build
+│       └── requirements.txt
 │
-├── kubernetes/
-│   ├── namespaces/
-│   │   └── todo-app.yaml
-│   ├── deployments/
-│   │   ├── backend.yaml
-│   │   ├── frontend.yaml
-│   │   └── postgres.yaml
-│   ├── services/
-│   │   ├── backend-service.yaml
-│   │   ├── frontend-service.yaml
-│   │   └── postgres-service.yaml
-│   ├── configmaps/
-│   │   ├── backend-config.yaml
-│   │   └── frontend-config.yaml
-│   ├── secrets/
-│   │   └── app-secrets.yaml
-│   ├── ingress/
-│   │   └── ingress.yaml
-│   └── persistent-volumes/
-│       └── postgres-pv.yaml
+├── helm-charts/
+│   ├── todo-frontend/   # Frontend Helm chart
+│   └── todo-backend/    # Backend Helm chart
 │
-├── helm/
-│   └── todo-app/
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
+├── k8s/
+│   ├── namespace.yaml   # Todo namespace
+│   ├── frontend-deployment.yaml
+│   └── backend-deployment.yaml
 │
-├── minikube/
-│   ├── setup.sh
-│   ├── deploy.sh
-│   └── cleanup.sh
-│
-└── README.md
+├── docker-compose.yml   # Local testing
+├── CLAUDE.md            # Claude Code instructions
+└── README.md            # This file
 ```
 
-## Key Features (Planned)
+## Current Progress
 
-### 1. Docker Containerization
-- Backend container (FastAPI)
-- Frontend container (Next.js)
-- Database container (PostgreSQL)
-- Multi-stage builds for optimization
+### Completed ✅
+- [x] Specifications (spec.md, plan.md, tasks.md)
+- [x] SubAgent skill documentation (4 agents)
+- [x] Frontend Dockerfile (multi-stage build)
+- [x] Backend Dockerfile (optimized Python)
+- [x] Docker Compose for local testing
+- [x] Helm Charts (frontend & backend)
+- [x] Kubernetes namespace manifest
+- [x] Docker images built successfully
+- [x] Images loaded to Minikube
+- [x] Deployed with Helm
+- [x] All pods running (2 frontend, 2 backend)
+- [x] Services accessible via NodePort
 
-### 2. Kubernetes Orchestration
-- Deployment manifests
-- Service discovery
-- ConfigMaps and Secrets
-- Persistent Volumes for database
-- Network Policies
+### Pending
+- [ ] Test end-to-end functionality in browser
+- [ ] AIOps integration testing (optional)
 
-### 3. Helm Charts
-- Templated deployments
-- Easy version management
-- Configuration management
-- Release tracking
+## Docker Images
 
-### 4. Monitoring & Logging
-- Prometheus metrics
-- Grafana dashboards
-- ELK stack (Elasticsearch, Logstash, Kibana)
-- Health checks and alerts
+Verified images built:
+```
+todo-frontend:v1   (1.35GB)
+todo-backend:v1    (474MB)
+```
 
-## Technology Stack (Planned)
+## Helm Charts Configuration
 
-- **Containerization**: Docker
-- **Orchestration**: Kubernetes (k8s)
-- **Package Manager**: Helm
-- **Local Testing**: Minikube
-- **Monitoring**: Prometheus + Grafana
-- **Logging**: ELK Stack
-- **Cloud**: Compatible with GKE, EKS, AKS
+### Frontend (NodePort 30080)
+- Replicas: 2
+- Port: 3000
+- Resources: 100m-500m CPU, 128Mi-512Mi Memory
 
-## Deployment Targets (Planned)
+### Backend (NodePort 30800)
+- Replicas: 2
+- Port: 8000
+- Resources: 100m-500m CPU, 256Mi-512Mi Memory
+- Secrets: API keys passed via Helm --set
 
-- **Local**: Minikube (development)
-- **Staging**: Kubernetes cluster (testing)
-- **Production**: Cloud provider (live)
-  - Google Cloud (GKE)
-  - AWS (EKS)
-  - Azure (AKS)
-  - Self-managed Kubernetes
+## Troubleshooting
 
-## Relationship to Phase-3
+### Common Commands
+```bash
+# Check pods
+kubectl get pods -n todo
 
-**Phase-4 packages Phase-3** without changes:
-- ✅ All Phase-3 features containerized
-- ✅ No code modifications required
-- ✅ Infrastructure-focused only
-- ✅ Backwards compatible
-- ✅ Scalable deployment
+# View logs
+kubectl logs -f <pod-name> -n todo
 
-## Architectural Benefits
+# Describe pod
+kubectl describe pod <pod-name> -n todo
 
-### Scalability
-- Horizontal pod autoscaling
-- Load balancing
-- Resource optimization
-- Multi-replica deployments
+# Delete and recreate
+helm uninstall todo-frontend -n todo
+helm uninstall todo-backend -n todo
+```
 
-### Reliability
-- Self-healing pods
-- Rolling updates
-- Health monitoring
-- Automatic restarts
+### Image Loading
+```bash
+# Verify images in Minikube
+minikube image list | grep todo
 
-### Operations
-- Centralized logging
-- Performance metrics
-- Easy debugging
-- Version management
+# Re-load if needed
+minikube image load todo-frontend:v1
+minikube image load todo-backend:v1
+```
 
-## Next Steps
+## References
 
-1. **Wait for Phase-3 completion**
-2. **Create Docker images**
-3. **Write Kubernetes manifests**
-4. **Design Helm charts**
-5. **Test with Minikube**
-6. **Deploy to staging**
-7. **Deploy to production**
+- Hackathon-2 PDF: Phase-4 (Page 22-23)
+- Phase-3 Source: `../Phase-3/frontend/` and `../Phase-3/backend/`
+- [Minikube Documentation](https://minikube.sigs.k8s.io/docs)
+- [Helm Documentation](https://helm.sh/docs)
+- [Kubernetes Documentation](https://kubernetes.io/docs)
 
-## Prerequisites to Learn
+## Deployment Status
 
-- Docker fundamentals
-- Kubernetes basics
-- YAML configuration
-- kubectl commands
-- Helm templating
-- Cloud provider CLI tools
+```
+$ kubectl get pods -n todo
+NAME                             READY   STATUS    RESTARTS   AGE
+todo-backend-5d46c84fbd-j42ng    1/1     Running   0          5m
+todo-backend-5d46c84fbd-v5rjw    1/1     Running   0          5m
+todo-frontend-6598f6b59f-frcd2   1/1     Running   0          5m
+todo-frontend-6598f6b59f-skzqq   1/1     Running   0          5m
 
-## Placeholder Status
-
-- ⏳ Specification: Not started
-- ⏳ Planning: Not started
-- ⏳ Docker setup: Not started
-- ⏳ Kubernetes manifests: Not started
-- ⏳ Helm charts: Not started
-- ⏳ Deployment: Not started
+$ kubectl get services -n todo
+NAME                    TYPE       CLUSTER-IP      PORT(S)          AGE
+todo-backend-service    NodePort   10.110.240.4    8000:30800/TCP   5m
+todo-frontend-service   NodePort   10.108.117.88   80:30080/TCP     5m
+```
 
 ---
 
-**Phase-4 Coming Soon!** 🚀
-
-After Phase-3 is complete, Phase-4 will containerize and orchestrate the system.
-
-See `../Phase-3/README.md` for current status.
+**Next Steps**: Open frontend URL in browser and test the application!

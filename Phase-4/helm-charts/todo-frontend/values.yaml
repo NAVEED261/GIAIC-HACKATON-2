@@ -32,7 +32,8 @@ resources:
 # Environment configuration
 config:
   nodeEnv: "production"
-  apiUrl: "http://todo-backend-service:8000"
+  # For browser access, use the minikube tunnel URL (run: minikube service todo-backend-service -n todo --url)
+  apiUrl: "http://127.0.0.1:49405"
 
 # Health check configuration
 healthCheck:
