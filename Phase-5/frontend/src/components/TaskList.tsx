@@ -24,13 +24,11 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
   }, [isAuthenticated, userId, refreshTrigger])
 
   const fetchTasks = async () => {
-    if (!userId) return
-
     setLoading(true)
     setError('')
 
     try {
-      const data = await tasksClient.getTasks(userId)
+      const data = await tasksClient.getTasks()
       setTasks(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load tasks')
@@ -41,12 +39,10 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
   }
 
   const handleComplete = async (taskId: number) => {
-    if (!userId) return
-
     setActionLoading(taskId)
 
     try {
-      const updated = await tasksClient.completeTask(userId, taskId)
+      const updated = await tasksClient.completeTask(taskId)
       setTasks(tasks.map(t => t.id === taskId ? updated : t))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete task')
@@ -56,8 +52,6 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
   }
 
   const handleDelete = async (taskId: number) => {
-    if (!userId) return
-
     if (!confirm('Are you sure you want to delete this task?')) {
       return
     }
@@ -65,7 +59,7 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
     setActionLoading(taskId)
 
     try {
-      await tasksClient.deleteTask(userId, taskId)
+      await tasksClient.deleteTask(taskId)
       setTasks(tasks.filter(t => t.id !== taskId))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete task')

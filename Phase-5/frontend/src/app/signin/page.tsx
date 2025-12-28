@@ -60,7 +60,7 @@ export default function SignInPage() {
       console.log('SIGNIN RESPONSE:', response)
 
       // Store user info
-      login(response.access_token, response.user_id, response.name, response.email)
+      login(response.access_token, response.user.id, response.user.name, response.user.email)
 
       // Debug: check if login worked
       console.log('TOKEN IN LOCALSTORAGE:', localStorage.getItem('token'))

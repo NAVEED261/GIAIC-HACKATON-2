@@ -35,7 +35,7 @@ export default function AddTaskForm({ onTaskAdded }: AddTaskFormProps) {
     }
 
     try {
-      await tasksClient.createTask(userId, {
+      await tasksClient.createTask({
         title: title.trim(),
         description: description.trim() || undefined
       })
