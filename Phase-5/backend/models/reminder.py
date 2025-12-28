@@ -61,9 +61,9 @@ class Reminder(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Relationships
-    task: Optional["Task"] = Relationship(back_populates="reminders")
-    user: Optional["User"] = Relationship(back_populates="reminders")
+    # Relationships - commented to avoid circular import issues
+    # task: Optional["Task"] = Relationship(back_populates="reminders")
+    # user: Optional["User"] = Relationship(back_populates="reminders")
 
 
 class ReminderCreate(SQLModel):

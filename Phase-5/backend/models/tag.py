@@ -42,13 +42,9 @@ class Tag(SQLModel, table=True):
     description: Optional[str] = Field(default=None, max_length=200)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Relationships
-    user: Optional["User"] = Relationship(back_populates="tags")
-    tasks: List["Task"] = Relationship(back_populates="tags", link_model=TaskTag)
-
-    class Config:
-        # Ensure unique tag names per user
-        table_args = {"unique_constraint": ["user_id", "name"]}
+    # Relationships - commented to avoid circular import issues
+    # user: Optional["User"] = Relationship(back_populates="tags")
+    # tasks: List["Task"] = Relationship(back_populates="tags", link_model=TaskTag)
 
 
 class TagCreate(SQLModel):

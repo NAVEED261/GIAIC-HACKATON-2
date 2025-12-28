@@ -13,7 +13,7 @@ from enum import Enum
 
 if TYPE_CHECKING:
     from .user import User
-    from .tag import Tag
+    from .tag import Tag, TaskTag
     from .reminder import Reminder
 
 
@@ -71,10 +71,10 @@ class Task(SQLModel, table=True):
     parent_task_id: Optional[int] = Field(default=None, foreign_key="tasks.id")
     next_occurrence: Optional[datetime] = Field(default=None)
 
-    # Relationships
-    user: Optional["User"] = Relationship(back_populates="tasks")
-    tags: List["Tag"] = Relationship(back_populates="tasks", link_model="TaskTag")
-    reminders: List["Reminder"] = Relationship(back_populates="task")
+    # Relationships - defined after all models are loaded
+    # user: Optional["User"] = Relationship(back_populates="tasks")
+    # tags: List["Tag"] = Relationship(back_populates="tasks", link_model=TaskTag)
+    # reminders: List["Reminder"] = Relationship(back_populates="task")
 
 
 class TaskCreate(SQLModel):
@@ -105,7 +105,7 @@ class TaskRead(SQLModel):
     next_occurrence: Optional[datetime]
     created_at: datetime
     updated_at: datetime
-    tags: List["TagRead"] = []
+    # tags will be loaded separately via API
     is_overdue: bool = False
 
     class Config:

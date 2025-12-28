@@ -38,10 +38,10 @@ class User(SQLModel, table=True):
     # Phase-5: Reminder preferences (stored as JSON string)
     reminder_preferences: Optional[str] = Field(default=None)
 
-    # Relationships
-    tasks: List["Task"] = Relationship(back_populates="user")
-    tags: List["Tag"] = Relationship(back_populates="user")
-    reminders: List["Reminder"] = Relationship(back_populates="user")
+    # Relationships - commented to avoid circular import issues
+    # tasks: List["Task"] = Relationship(back_populates="user")
+    # tags: List["Tag"] = Relationship(back_populates="user")
+    # reminders: List["Reminder"] = Relationship(back_populates="user")
 
     def verify_password(self, password: str) -> bool:
         """Verify a password against the hashed password"""

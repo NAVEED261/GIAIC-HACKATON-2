@@ -151,7 +151,11 @@ class AgentOrchestrator:
     def register_agent(self, agent: BaseAgent):
         """Register an agent"""
         self.agents[agent.domain] = agent
-        print(f"  {agent.emoji} Registered: {agent.name} ({agent.domain})")
+        try:
+            print(f"  {agent.emoji} Registered: {agent.name} ({agent.domain})")
+        except UnicodeEncodeError:
+            # Windows console encoding fallback
+            print(f"  [*] Registered: {agent.name} ({agent.domain})")
 
     def set_default_agent(self, domain: str):
         """Set default agent for unmatched queries"""
