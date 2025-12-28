@@ -1,261 +1,202 @@
-# Phase-5: Cloud-Scale Event-Driven System
+# Phase-5: Advanced Features & Local Deployment
 
-**Status**: 📋 **PLANNED**
+**Status**: IN PROGRESS
 
-This folder will contain Phase-5 of the Hackathon-2 project - evolving into a cloud-scale, event-driven architecture with advanced features.
+## Overview
 
-## Vision
+Phase-5 implements advanced todo features with local Kubernetes deployment using Minikube and Dapr.
 
-Transform Phase-4 Kubernetes system into enterprise-grade:
-- Event-driven microservices
-- Message streaming (Kafka)
-- Service mesh (Dapr)
-- Advanced features (notifications, analytics, integrations)
-- Global scalability
+### Part A: Advanced Features (Complete)
+- Recurring Tasks (daily/weekly/monthly)
+- Due Dates & Reminders
+- Task Priorities (low/medium/high/urgent)
+- Tags & Categories
+- Search, Filter, Sort
 
-## Expected Structure (Coming Soon)
+### Part B: Local Deployment (Complete)
+- Minikube (Local Kubernetes)
+- Dapr (Distributed Runtime)
+- Kafka/Redpanda (Event Streaming)
+
+### Part C: Cloud Deployment (Pending)
+- DigitalOcean / GKE / AKS
+- CI/CD Pipeline
+
+## Quick Start
+
+### Prerequisites
+- Docker Desktop
+- Minikube
+- kubectl
+- Helm
+- Dapr CLI
+
+### Deploy Locally
+```bash
+cd Phase-5
+chmod +x scripts/deploy-local.sh
+./scripts/deploy-local.sh
+```
+
+### Access Application
+```bash
+# Start tunnel (in separate terminal)
+minikube tunnel
+
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:8000
+```
+
+## Project Structure
 
 ```
 Phase-5/
-├── specs/
-│   ├── phase-5-overview.md
-│   ├── features/
-│   │   ├── event-streaming.md
-│   │   ├── microservices.md
-│   │   ├── notifications.md
-│   │   ├── analytics.md
-│   │   └── integrations.md
-│   ├── architecture/
-│   │   ├── event-driven.md
-│   │   ├── service-mesh.md
-│   │   └── distributed-tracing.md
-│   └── operations/
-│       ├── scaling.md
-│       ├── resilience.md
-│       └── disaster-recovery.md
+├── specs/                    # Specifications
+│   ├── spec.md              # Main spec
+│   ├── plan.md              # Implementation plan
+│   ├── tasks.md             # Task checklist
+│   └── features/            # Feature specs
 │
-├── services/
-│   ├── task-service/
-│   │   ├── Dockerfile
-│   │   └── src/
-│   ├── notification-service/
-│   │   ├── Dockerfile
-│   │   └── src/
-│   ├── analytics-service/
-│   │   ├── Dockerfile
-│   │   └── src/
-│   └── integration-service/
-│       ├── Dockerfile
-│       └── src/
+├── AI_EMPLOYS_PHZ_5/        # AI Agents (8 agents, 96 tools)
+│   ├── infrastructure/      # Kafka, Dapr agents
+│   ├── application/         # Feature, Recurring, Reminder agents
+│   └── devops/              # K8s, Helm, Minikube agents
 │
-├── events/
-│   ├── schemas/
-│   │   ├── task-created.avsc
-│   │   ├── task-completed.avsc
-│   │   └── task-deleted.avsc
-│   ├── producers/
-│   │   └── task-events.py
-│   └── consumers/
-│       ├── notification-consumer.py
-│       ├── analytics-consumer.py
-│       └── integration-consumer.py
+├── backend/                  # FastAPI Backend
+│   ├── models/              # SQLModel entities
+│   ├── services/            # Business logic
+│   ├── routes/              # API endpoints
+│   └── dapr_components/     # Dapr YAML configs
 │
-├── kafka/
-│   ├── topics.yaml
-│   ├── docker-compose.yml
-│   └── config/
+├── k8s/                      # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── backend-deployment.yaml
+│   ├── frontend-deployment.yaml
+│   └── ...
 │
-├── dapr/
-│   ├── components/
-│   │   ├── statestore.yaml
-│   │   ├── pubsub.yaml
-│   │   └── secrets.yaml
-│   ├── services/
-│   │   └── api.yaml
-│   └── config/
-│       └── configuration.yaml
-│
-├── observability/
-│   ├── prometheus/
-│   │   └── prometheus.yml
-│   ├── grafana/
-│   │   └── dashboards/
-│   ├── jaeger/
-│   │   └── config.yaml
-│   └── loki/
-│       └── config.yaml
-│
-└── README.md
+└── scripts/                  # Deployment scripts
+    └── deploy-local.sh
 ```
 
-## Key Features (Planned)
+## API Endpoints
 
-### 1. Event Streaming
-- Apache Kafka for message streaming
-- Event-driven architecture
-- Multiple topics (task.*, user.*)
-- Event sourcing capabilities
-- Event versioning and schema registry
+### Tasks
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /tasks | Create task |
+| GET | /tasks | List tasks (with filters) |
+| GET | /tasks/{id} | Get task |
+| PATCH | /tasks/{id} | Update task |
+| DELETE | /tasks/{id} | Delete task |
+| POST | /tasks/{id}/complete | Complete task |
+| POST | /tasks/{id}/priority | Set priority |
+| POST | /tasks/{id}/due-date | Set due date |
+| POST | /tasks/{id}/tags | Add tags |
+| POST | /tasks/{id}/skip | Skip recurring |
+| POST | /tasks/{id}/stop-recurring | Stop recurring |
 
-### 2. Microservices
-- Task Service (task management)
-- Notification Service (emails, alerts)
-- Analytics Service (usage metrics, insights)
-- Integration Service (third-party APIs)
-- Independent deployment and scaling
+### Tags
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /tags | Create tag |
+| GET | /tags | List tags |
+| PATCH | /tags/{id} | Update tag |
+| DELETE | /tags/{id} | Delete tag |
 
-### 3. Dapr Service Mesh
-- Distributed application runtime
-- Service-to-service communication
-- State management
-- Pub/sub abstraction
-- Secrets management
-- Service invocation
+### Reminders
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /reminders | Create reminder |
+| GET | /reminders | List upcoming |
+| GET | /reminders/overdue | Get overdue tasks |
+| POST | /reminders/{id}/snooze | Snooze reminder |
+| DELETE | /reminders/{id} | Cancel reminder |
 
-### 4. Notifications
-- Email notifications
-- Push notifications
-- Slack/Teams integration
-- Event-triggered alerts
-- Custom notification rules
+## Dapr Components
 
-### 5. Advanced Analytics
-- Task completion metrics
-- User behavior analysis
-- Performance insights
-- Productivity recommendations
-- Usage dashboards
+| Component | Type | Purpose |
+|-----------|------|---------|
+| kafka-pubsub | pubsub.kafka | Event messaging |
+| statestore | state.redis | State management |
+| reminder-cron | bindings.cron | Reminder scheduling |
+| kubernetes-secrets | secretstores.kubernetes | Secret management |
 
-### 6. Third-Party Integrations
-- Calendar integration (Google Calendar, Outlook)
-- Productivity tools (Slack, Jira, Asana)
-- CRM integration (Salesforce)
-- Webhook support for external systems
+## Kafka Topics
 
-## Technology Stack (Planned)
+| Topic | Purpose |
+|-------|---------|
+| task-events | Task CRUD events |
+| reminders | Reminder scheduling |
+| notifications | Notification delivery |
 
-- **Event Stream**: Apache Kafka
-- **Service Mesh**: Dapr
-- **Monitoring**: Prometheus + Grafana
-- **Tracing**: Jaeger
-- **Logging**: Loki + Promtail
-- **Persistence**: PostgreSQL + Redis
-- **Message Format**: Apache Avro
-- **Cloud**: Multi-cloud ready
+## AI Employs System
 
-## Architecture Patterns (Planned)
+8 Expert Agents with 96 MCP Tools:
 
-### Event-Driven
-- Services communicate via events
-- Eventual consistency model
-- Decoupled services
-- Event sourcing for audit trail
+| Agent | Tools | Domain |
+|-------|-------|--------|
+| KafkaAgent | 12 | Event streaming |
+| DaprAgent | 15 | Distributed runtime |
+| FeatureAgent | 12 | Task features |
+| RecurringAgent | 8 | Recurring tasks |
+| ReminderAgent | 10 | Reminders |
+| K8sDeployAgent | 15 | Kubernetes |
+| HelmAgent | 12 | Helm charts |
+| MinikubeAgent | 12 | Local K8s |
 
-### Microservices
-- Each service owns its data
-- Independent scaling
-- Fault isolation
-- Technology diversity per service
+### Usage
+```bash
+cd AI_EMPLOYS_PHZ_5
+python main.py --agents       # List all agents
+python main.py --test         # Run tests
+python main.py                # Interactive mode
+```
 
-### Distributed Systems
-- Service discovery
-- Distributed tracing
-- Circuit breakers
-- Retry policies
-- Timeout handling
+## Commands
 
-## Non-Functional Requirements (Planned)
+```bash
+# Check pods
+kubectl get pods -n todo-phase5
 
-### Scalability
-- 100,000+ concurrent users
-- Millions of events per hour
-- Sub-second event processing
-- Global distribution
+# Check Dapr status
+dapr status -k
 
-### Reliability
-- 99.99% uptime SLO
-- Automatic failover
-- Data replication
-- Disaster recovery
+# View logs
+kubectl logs -l app=backend -n todo-phase5
 
-### Performance
-- <100ms event processing
-- <1s end-to-end latency
-- Linear scaling with load
-- Efficient resource usage
+# List Kafka topics
+kubectl exec -it redpanda-0 -n todo-phase5 -- rpk topic list
+```
 
-## Relationship to Phase-4
+## Part A Features
 
-**Phase-5 evolves Phase-4** without breaking changes:
-- ✅ All Phase-4 features preserved
-- ✅ Kubernetes foundation extended
-- ✅ New event-driven capabilities
-- ✅ Backwards compatible APIs
-- ✅ Incremental migration path
+### Priority System
+```python
+# Priority levels
+LOW = "low"
+MEDIUM = "medium"  # default
+HIGH = "high"
+URGENT = "urgent"
+```
 
-## Enterprise Features (Planned)
+### Recurring Tasks
+```python
+# Patterns
+DAILY = "daily"      # Every N days
+WEEKLY = "weekly"    # Every N weeks
+MONTHLY = "monthly"  # Every N months
+CUSTOM = "custom"    # Custom interval
+```
 
-### Security
-- Multi-tenancy support
-- Role-based access control (RBAC)
-- Audit logging
-- Compliance (GDPR, SOC 2)
-- Data encryption at rest/in-transit
+### Reminders
+```python
+# Reminder types
+EMAIL = "email"
+PUSH = "push"        # default
+SMS = "sms"
+IN_APP = "in_app"
+```
 
-### Compliance
-- Data residency controls
-- Audit trails
-- Retention policies
-- Right to be forgotten
-- Data export capabilities
+## License
 
-### Administration
-- User management
-- Workspace/organization management
-- Team collaboration
-- Usage quotas and limits
-- Billing and metering
-
-## Next Steps
-
-1. **Wait for Phase-4 completion**
-2. **Design event-driven architecture**
-3. **Plan microservices decomposition**
-4. **Define event schemas**
-5. **Implement Kafka integration**
-6. **Deploy Dapr service mesh**
-7. **Build notification service**
-8. **Implement analytics**
-9. **Add integrations**
-10. **Deploy to production**
-
-## Prerequisites to Learn
-
-- Event-driven architecture patterns
-- Apache Kafka/stream processing
-- Dapr framework
-- Distributed systems concepts
-- Microservices best practices
-- Distributed tracing
-- Multi-tenancy patterns
-- Compliance and security
-
-## Placeholder Status
-
-- ⏳ Specification: Not started
-- ⏳ Planning: Not started
-- ⏳ Event schema design: Not started
-- ⏳ Microservices: Not started
-- ⏳ Kafka integration: Not started
-- ⏳ Dapr implementation: Not started
-- ⏳ Notifications: Not started
-- ⏳ Analytics: Not started
-- ⏳ Integrations: Not started
-
----
-
-**Phase-5 Coming Soon!** 🚀
-
-After Phase-4 is complete, Phase-5 will transform the system into an enterprise-grade, event-driven platform.
-
-See `../Phase-4/README.md` for current status.
+Part of GIAIC Hackathon-2 Project

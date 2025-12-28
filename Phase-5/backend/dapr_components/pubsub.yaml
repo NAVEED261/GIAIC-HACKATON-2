@@ -1,0 +1,22 @@
+# Kafka/Redpanda Pub/Sub Component
+# Used for event-driven communication
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+  namespace: todo-phase5
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: "redpanda.todo-phase5.svc.cluster.local:9092"
+    - name: consumerGroup
+      value: "todo-consumers"
+    - name: authType
+      value: "none"
+    - name: maxMessageBytes
+      value: "1048576"  # 1MB
+scopes:
+  - backend
+  - notification-service
