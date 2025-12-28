@@ -193,3 +193,15 @@ python main.py --agents
 
 **Status**: Specs and AI Employs COMPLETE
 **Next**: Implementation of Part A and Part B
+
+---
+
+## Q&A Session
+
+| Question | Answer |
+|----------|--------|
+| Kitne agents banaye? | 8 Expert Agents |
+| Total MCP tools? | 96 tools |
+| Agents 100% expert? | YES - har agent apne domain ka expert |
+| Agents reusable? | YES - copy karke kahi bhi use ho sakte |
+| Tasks kyun nahi thi? | Ab bana di - 65 tasks in tasks.md |
