@@ -7,7 +7,7 @@ replicaCount: 2
 # Image configuration
 image:
   repository: todo-frontend
-  tag: "v1"
+  tag: "v5"
   pullPolicy: IfNotPresent
 
 # Container port
