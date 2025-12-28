@@ -23,12 +23,12 @@ from routes import tasks_router, tags_router, reminders_router
 async def lifespan(app: FastAPI):
     """Application lifespan - startup and shutdown"""
     # Startup
-    print("🚀 Starting Phase-5 Backend...")
+    print("[*] Starting Phase-5 Backend...")
     init_db()
-    print("✅ Database initialized")
+    print("[OK] Database initialized")
     yield
     # Shutdown
-    print("👋 Shutting down Phase-5 Backend...")
+    print("[*] Shutting down Phase-5 Backend...")
 
 
 # Create FastAPI app
