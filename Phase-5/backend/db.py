@@ -6,7 +6,11 @@ PostgreSQL connection with SQLModel
 """
 
 import os
+from dotenv import load_dotenv
 from sqlmodel import SQLModel, Session, create_engine
+
+# Load .env file
+load_dotenv()
 from typing import Generator
 
 # Database URL from environment or default

@@ -7,6 +7,10 @@ FastAPI application with advanced features
 """
 
 import os
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +20,7 @@ from db import init_db, get_session, engine
 from models import User, UserCreate, UserRead, UserLogin
 from models.user import ReminderPreferences
 from middleware.auth import create_access_token, get_current_user
-from routes import tasks_router, tags_router, reminders_router
+from routes import tasks_router, tags_router, reminders_router, chat_router
 
 
 @asynccontextmanager
@@ -52,6 +56,7 @@ app.add_middleware(
 app.include_router(tasks_router, prefix="/api")
 app.include_router(tags_router, prefix="/api")
 app.include_router(reminders_router, prefix="/api")
+app.include_router(chat_router)  # Already has /api/chat prefix
 
 
 # ==================== Health & Info ====================
@@ -163,14 +168,16 @@ async def dapr_subscribe():
 @app.post("/api/events/tasks")
 async def handle_task_events(event: dict):
     """Handle task events from Kafka"""
-    print(f"📨 Task event received: {event}")
+    import logging
+    logging.info(f"Task event received: {event}")
     return {"status": "ok"}
 
 
 @app.post("/api/events/reminders")
 async def handle_reminder_events(event: dict):
     """Handle reminder events from Kafka"""
-    print(f"⏰ Reminder event received: {event}")
+    import logging
+    logging.info(f"Reminder event received: {event}")
     return {"status": "ok"}
 
 

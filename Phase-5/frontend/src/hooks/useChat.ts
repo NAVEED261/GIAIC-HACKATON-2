@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from './useAuth'
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 interface ChatResponse {
-  conversation_id: number
   response: string
   tool_calls: string[]
   status: string
@@ -16,7 +10,7 @@ interface ChatResponse {
 export function useChat() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { token, userId } = useAuth()
+  const { token, isAuthenticated } = useAuth()
 
   const sendMessage = async (
     message: string,
@@ -26,7 +20,7 @@ export function useChat() {
     setError(null)
 
     // Validate auth
-    if (!token || !userId) {
+    if (!token || !isAuthenticated) {
       setError('Not authenticated. Please sign in first.')
       setIsLoading(false)
       return null
@@ -35,14 +29,13 @@ export function useChat() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-      const response = await fetch(`${apiUrl}/api/${userId}/chat`, {
+      const response = await fetch(`${apiUrl}/api/chat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          conversation_id: conversationId,
           message: message,
         }),
       })
@@ -55,7 +48,8 @@ export function useChat() {
       }
 
       const data: ChatResponse = await response.json()
-      return data
+      // Add a dummy conversation_id for UI compatibility
+      return { ...data, conversation_id: 1 } as ChatResponse & { conversation_id: number }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Network error'
       setError(`Failed to send message: ${errorMsg}`)
