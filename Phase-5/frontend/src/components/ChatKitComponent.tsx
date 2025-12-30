@@ -49,7 +49,7 @@ export default function ChatKitComponent() {
       if (!token || !user?.id) return
 
       const response = await axios.get(
-        `${API_URL}/api/${user.id}/conversations`,
+        `${API_URL}/api/conversations/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ export default function ChatKitComponent() {
       if (!token || !user?.id) return
 
       const response = await axios.get(
-        `${API_URL}/api/${user.id}/conversations/${conversationId}`,
+        `${API_URL}/api/conversations/${conversationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -125,7 +125,7 @@ export default function ChatKitComponent() {
       }
 
       const response = await axios.post(
-        `${API_URL}/api/${user.id}/chat`,
+        `${API_URL}/api/chat/`,
         {
           message: messageContent,
           conversation_id: currentConversationId,

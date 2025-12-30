@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from './useAuth'
 
 interface ChatResponse {
+  conversation_id: number
   response: string
   tool_calls: string[]
   status: string
@@ -37,6 +38,7 @@ export function useChat() {
         },
         body: JSON.stringify({
           message: message,
+          conversation_id: conversationId,
         }),
       })
 
@@ -48,8 +50,7 @@ export function useChat() {
       }
 
       const data: ChatResponse = await response.json()
-      // Add a dummy conversation_id for UI compatibility
-      return { ...data, conversation_id: 1 } as ChatResponse & { conversation_id: number }
+      return data
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Network error'
       setError(`Failed to send message: ${errorMsg}`)
