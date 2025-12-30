@@ -18,6 +18,9 @@ bcrypt==4.1.2
 # HTTP Client (for Dapr)
 httpx==0.26.0
 
+# OpenAI (for AI Chat)
+openai>=1.0.0
+
 # Validation
 pydantic==2.5.3
 email-validator==2.1.0
