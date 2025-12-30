@@ -20,6 +20,8 @@ from .reminder import (
     ReminderType, ReminderStatus
 )
 from .user import User, UserCreate, UserRead, UserLogin, ReminderPreferences
+from .conversation import Conversation
+from .message import Message
 
 __all__ = [
     # Task
@@ -53,4 +55,8 @@ __all__ = [
     "UserRead",
     "UserLogin",
     "ReminderPreferences",
+
+    # Chat History
+    "Conversation",
+    "Message",
 ]

@@ -16,15 +16,17 @@ from typing import Generator
 # Database URL from environment or default
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://todouser:todopass@localhost:5432/tododb"
+    "sqlite:///./phase5_test.db"  # Default to SQLite for local testing
 )
 
 # For SQLite testing
-SQLITE_URL = "sqlite:///./test.db"
+SQLITE_URL = "sqlite:///./phase5_test.db"
 
-# Use PostgreSQL in production, SQLite for testing
-if os.getenv("TESTING", "false").lower() == "true":
-    engine = create_engine(SQLITE_URL, echo=True, connect_args={"check_same_thread": False})
+# Check if using SQLite or PostgreSQL
+is_sqlite = DATABASE_URL.startswith("sqlite")
+
+if is_sqlite:
+    engine = create_engine(DATABASE_URL, echo=True, connect_args={"check_same_thread": False})
 else:
     engine = create_engine(DATABASE_URL, echo=True)
 

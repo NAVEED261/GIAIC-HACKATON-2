@@ -20,7 +20,7 @@ from db import init_db, get_session, engine
 from models import User, UserCreate, UserRead, UserLogin
 from models.user import ReminderPreferences
 from middleware.auth import create_access_token, get_current_user
-from routes import tasks_router, tags_router, reminders_router, chat_router
+from routes import tasks_router, tags_router, reminders_router, chat_router, conversations_router
 
 
 @asynccontextmanager
@@ -57,6 +57,7 @@ app.include_router(tasks_router, prefix="/api")
 app.include_router(tags_router, prefix="/api")
 app.include_router(reminders_router, prefix="/api")
 app.include_router(chat_router)  # Already has /api/chat prefix
+app.include_router(conversations_router)  # Already has /api/conversations prefix
 
 
 # ==================== Health & Info ====================

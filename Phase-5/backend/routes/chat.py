@@ -18,8 +18,11 @@ from db import get_session
 from models.task import Task, TaskCreate, Priority, RecurrencePattern
 from models.tag import Tag
 from models.reminder import Reminder, ReminderType
+from models.conversation import Conversation
+from models.message import Message
 from middleware.auth import get_current_user
 from models.user import User
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +31,11 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 class ChatRequest(BaseModel):
     message: str
+    conversation_id: Optional[int] = None
 
 
 class ChatResponse(BaseModel):
+    conversation_id: int
     response: str
     tool_calls: list
     status: str
@@ -215,6 +220,42 @@ async def chat(
     if not client:
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
 
+    # Get or create conversation
+    if request.conversation_id:
+        conversation = session.exec(
+            select(Conversation).where(
+                Conversation.id == request.conversation_id,
+                Conversation.user_id == current_user.id
+            )
+        ).first()
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+    else:
+        conversation = Conversation(user_id=current_user.id)
+        session.add(conversation)
+        session.commit()
+        session.refresh(conversation)
+        logger.info(f"Created new conversation {conversation.id} for user {current_user.id}")
+
+    # Fetch conversation history for context
+    history_messages = session.exec(
+        select(Message)
+        .where(Message.conversation_id == conversation.id)
+        .order_by(Message.created_at)
+    ).all()
+
+    # Store user message
+    user_message = Message(
+        conversation_id=conversation.id,
+        user_id=current_user.id,
+        role="user",
+        content=request.message
+    )
+    session.add(user_message)
+    session.commit()
+    logger.info(f"Stored user message in conversation {conversation.id}")
+
+    # Build messages with history
     messages = [
         {
             "role": "system",
@@ -225,9 +266,15 @@ You help users manage tasks with advanced features:
 - Tags and categories
 
 Use the provided functions to manage tasks. Be helpful and conversational."""
-        },
-        {"role": "user", "content": request.message}
+        }
     ]
+
+    # Add history
+    for hist_msg in history_messages:
+        messages.append({"role": hist_msg.role, "content": hist_msg.content})
+
+    # Add current message
+    messages.append({"role": "user", "content": request.message})
 
     tools_used = []
 
@@ -250,6 +297,7 @@ Use the provided functions to manage tasks. Be helpful and conversational."""
                 function_args = json.loads(tool_call.function.arguments)
 
                 tools_used.append(function_name)
+                logger.info(f"Executing function: {function_name} with args: {function_args}")
 
                 result = execute_function(session, current_user.id, function_name, function_args)
 
@@ -269,7 +317,22 @@ Use the provided functions to manage tasks. Be helpful and conversational."""
         else:
             assistant_response = assistant_message.content
 
+        # Store assistant response
+        assistant_msg = Message(
+            conversation_id=conversation.id,
+            user_id=current_user.id,
+            role="assistant",
+            content=assistant_response
+        )
+        session.add(assistant_msg)
+
+        # Update conversation timestamp
+        conversation.updated_at = datetime.utcnow()
+        session.commit()
+        logger.info(f"Stored assistant response in conversation {conversation.id}")
+
         return ChatResponse(
+            conversation_id=conversation.id,
             response=assistant_response,
             tool_calls=tools_used,
             status="success"
