@@ -16,7 +16,7 @@ from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlmodel import Session
 
 from db import get_session
-from agents import AuthAgent, ConversationAgent, ErrorHandlingAgent
+from ai_employ_phase_3 import AuthAgent, ConversationAgent, ErrorHandlingAgent
 from models import Conversation, Message
 
 logger = logging.getLogger(__name__)
@@ -82,17 +82,18 @@ async def list_conversations(
         # 4. Format response with previews
         result = []
         for conv in conversations:
-            messages = await ConversationAgent.fetch_message_history(
+            messages = await ConversationAgent.fetch_message_history_paginated(
                 session,
                 conv.id,
                 limit=1
             )
             preview = messages[-1].content[:50] if messages else "No messages"
 
+            all_messages = await ConversationAgent.fetch_message_history_paginated(session, conv.id)
             result.append({
                 "id": conv.id,
                 "user_id": conv.user_id,
-                "message_count": len(await ConversationAgent.fetch_message_history(session, conv.id)),
+                "message_count": len(all_messages),
                 "created_at": conv.created_at.isoformat(),
                 "updated_at": conv.updated_at.isoformat(),
                 "preview": preview
@@ -150,8 +151,8 @@ async def get_conversation(
         if not conversation or conversation.user_id != user_id:
             raise HTTPException(status_code=404, detail="Conversation not found")
 
-        # 4. ConversationAgent: Fetch message history
-        messages = await ConversationAgent.fetch_message_history(
+        # 4. ConversationAgent: Fetch message history (returns Message objects)
+        messages = await ConversationAgent.fetch_message_history_paginated(
             session,
             conversation_id
         )
@@ -225,8 +226,8 @@ async def get_conversation_messages(
         if not conversation or conversation.user_id != user_id:
             raise HTTPException(status_code=404, detail="Conversation not found")
 
-        # 4. ConversationAgent: Fetch paginated messages
-        messages = await ConversationAgent.fetch_message_history(
+        # 4. ConversationAgent: Fetch paginated messages (returns Message objects)
+        messages = await ConversationAgent.fetch_message_history_paginated(
             session,
             conversation_id,
             limit=limit,
