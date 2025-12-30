@@ -14,7 +14,7 @@ from sqlmodel import Session, select
 from models.task import Task, TaskCreate, TaskRead, TaskUpdate
 from models.user import User
 from db import get_session
-from agents.auth_agent import AuthAgent
+from ai_employ_phase_3.auth_agent import AuthAgent
 from typing import List
 import os
 

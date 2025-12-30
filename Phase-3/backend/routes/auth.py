@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlmodel import Session, select
 from models.user import User, UserCreate, UserRead, UserLogin
 from db import get_session
-from agents.auth_agent import AuthAgent
+from ai_employ_phase_3.auth_agent import AuthAgent
 import os
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
