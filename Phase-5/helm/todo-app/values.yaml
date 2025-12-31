@@ -1,0 +1,37 @@
+# Phase-5 Todo App - Helm Values
+
+namespace: phase5-todo
+
+# PostgreSQL
+postgres:
+  enabled: true
+  image: postgres:15-alpine
+  database: phase5db
+  user: phase5user
+  password: phase5pass
+  storage: 1Gi
+
+# Redis
+redis:
+  enabled: true
+  image: redis:7-alpine
+
+# Backend
+backend:
+  replicas: 2
+  image: phase-5-backend:latest
+  port: 8000
+  jwtSecret: "phase5-k8s-jwt-secret-key-2024"
+  openaiKey: ""
+
+# Frontend
+frontend:
+  replicas: 2
+  image: phase-5-frontend:latest
+  port: 3000
+
+# Ingress
+ingress:
+  enabled: true
+  host: phase5.local
+  className: nginx

@@ -1,7 +1,6 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: phase5-todo
+  name: {{ .Values.namespace }}
   labels:
     app: phase5-todo
-    part: c
