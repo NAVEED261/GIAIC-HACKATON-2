@@ -203,4 +203,7 @@ class BaseAgent(ABC):
             self.is_working = False
 
     def __repr__(self):
-        return f"{self.emoji} {self.name} ({len(self.tools)} tools)"
+        try:
+            return f"{self.emoji} {self.name} ({len(self.tools)} tools)"
+        except UnicodeEncodeError:
+            return f"[{self.domain.upper()}] {self.name} ({len(self.tools)} tools)"

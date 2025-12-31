@@ -24,18 +24,12 @@ from base_agent import AgentResult
 def print_banner():
     """Print the AI Employs banner"""
     banner = """
-╔═══════════════════════════════════════════════════════════════════════╗
-║                                                                       ║
-║   ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗    ███████╗               ║
-║   ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ██╔════╝               ║
-║   ██████╔╝███████║███████║███████╗█████╗      ███████╗               ║
-║   ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝      ╚════██║               ║
-║   ██║     ██║  ██║██║  ██║███████║███████╗    ███████║               ║
-║   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚══════╝               ║
-║                                                                       ║
-║            AI EMPLOYS SYSTEM - Expert Domain Agents                   ║
-║                                                                       ║
-╚═══════════════════════════════════════════════════════════════════════╝
+=======================================================================
+|                                                                     |
+|   PHASE-5  AI EMPLOYS SYSTEM                                        |
+|   Expert Domain Agents for Todo Application                         |
+|                                                                     |
+=======================================================================
 """
     print(banner)
 
@@ -51,7 +45,7 @@ def print_agents_summary(orchestrator: AgentOrchestrator):
     for domain, agent in orchestrator.agents.items():
         tool_count = len(agent.tools)
         total_tools += tool_count
-        print(f"\n  {agent.emoji} {agent.name}")
+        print(f"\n  [{domain.upper()}] {agent.name}")
         print(f"     Domain: {domain}")
         print(f"     Description: {agent.description}")
         print(f"     MCP Tools: {tool_count}")
@@ -70,34 +64,34 @@ def print_agents_summary(orchestrator: AgentOrchestrator):
 
 async def run_single_query(orchestrator: AgentOrchestrator, query: str) -> Dict:
     """Run a single query through the orchestrator"""
-    print(f"\n📝 Query: {query}")
+    print(f"\n[QUERY] {query}")
     print("-" * 50)
 
     result = await orchestrator.delegate(query)
 
-    print(f"\n✅ Agent Used: {result.agent}")
-    print(f"🔧 Tool: {result.tool}")
-    print(f"\n📊 Result:")
-    print(json.dumps(result.result, indent=2, default=str))
+    print(f"\n[OK] Agent Used: {result.agent}")
+    print(f"[TOOL] {result.tool_used or 'N/A'}")
+    print(f"\n[RESULT]")
+    print(json.dumps(result.data, indent=2, default=str))
 
-    return result.result
+    return result.data
 
 
 async def run_interactive_mode(orchestrator: AgentOrchestrator):
     """Run in interactive mode"""
-    print("\n🎯 Interactive Mode - Enter queries or commands")
+    print("\n[MODE] Interactive Mode - Enter queries or commands")
     print("   Type 'help' for available commands")
     print("   Type 'exit' or 'quit' to exit\n")
 
     while True:
         try:
-            query = input("\n🤖 Enter query: ").strip()
+            query = input("\n[AI] Enter query: ").strip()
 
             if not query:
                 continue
 
             if query.lower() in ['exit', 'quit', 'q']:
-                print("\n👋 Goodbye!")
+                print("\n[BYE] Goodbye!")
                 break
 
             if query.lower() == 'help':
@@ -121,34 +115,34 @@ async def run_interactive_mode(orchestrator: AgentOrchestrator):
             print(json.dumps(result.result, indent=2, default=str))
 
         except KeyboardInterrupt:
-            print("\n\n👋 Interrupted. Goodbye!")
+            print("\n\n[BYE] Interrupted. Goodbye!")
             break
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n[ERROR] {e}")
 
 
 def print_help():
     """Print help information"""
     print("""
-╔═══════════════════════════════════════════════════════════════════════╗
-║                           HELP - Commands                             ║
-╠═══════════════════════════════════════════════════════════════════════╣
-║  agents          - Show all available agents                          ║
-║  tools <domain>  - Show tools for a specific agent domain             ║
-║  help            - Show this help message                             ║
-║  exit/quit       - Exit the program                                   ║
-╠═══════════════════════════════════════════════════════════════════════╣
-║                       Example Queries                                 ║
-╠═══════════════════════════════════════════════════════════════════════╣
-║  "create kafka topic for tasks"     → KafkaAgent                      ║
-║  "check dapr status"                → DaprAgent                       ║
-║  "set task priority high"           → FeatureAgent                    ║
-║  "create weekly recurring task"     → RecurringAgent                  ║
-║  "set reminder for tomorrow"        → ReminderAgent                   ║
-║  "deploy to kubernetes"             → K8sDeployAgent                  ║
-║  "install helm chart"               → HelmAgent                       ║
-║  "start minikube cluster"           → MinikubeAgent                   ║
-╚═══════════════════════════════════════════════════════════════════════╝
+=======================================================================
+                          HELP - Commands
+=======================================================================
+  agents          - Show all available agents
+  tools <domain>  - Show tools for a specific agent domain
+  help            - Show this help message
+  exit/quit       - Exit the program
+=======================================================================
+                       Example Queries
+=======================================================================
+  "create kafka topic for tasks"     -> KafkaAgent
+  "check dapr status"                -> DaprAgent
+  "set task priority high"           -> FeatureAgent
+  "create weekly recurring task"     -> RecurringAgent
+  "set reminder for tomorrow"        -> ReminderAgent
+  "deploy to kubernetes"             -> K8sDeployAgent
+  "install helm chart"               -> HelmAgent
+  "start minikube cluster"           -> MinikubeAgent
+=======================================================================
 """)
 
 
@@ -156,15 +150,15 @@ async def show_agent_tools(orchestrator: AgentOrchestrator, domain: str):
     """Show all tools for a specific agent"""
     agent = orchestrator.get_agent(domain)
     if not agent:
-        print(f"\n❌ Agent not found for domain: {domain}")
+        print(f"\n[ERROR] Agent not found for domain: {domain}")
         print(f"   Available domains: {', '.join(orchestrator.agents.keys())}")
         return
 
-    print(f"\n{agent.emoji} {agent.name} - MCP Tools")
+    print(f"\n[{domain.upper()}] {agent.name} - MCP Tools")
     print("=" * 50)
 
     for name, tool in agent.tools.items():
-        print(f"\n  📦 {name}")
+        print(f"\n  [TOOL] {name}")
         print(f"     {tool.description}")
         if tool.parameters:
             print(f"     Parameters: {tool.parameters}")
@@ -173,7 +167,7 @@ async def show_agent_tools(orchestrator: AgentOrchestrator, domain: str):
 async def run_agent_test(orchestrator: AgentOrchestrator,
                         agent_domain: str = None):
     """Run tests for agents"""
-    print("\n🧪 Running Agent Tests")
+    print("\n[TEST] Running Agent Tests")
     print("=" * 50)
 
     test_queries = {
@@ -221,7 +215,7 @@ async def run_agent_test(orchestrator: AgentOrchestrator,
 
     if agent_domain:
         if agent_domain not in test_queries:
-            print(f"\n❌ Unknown agent domain: {agent_domain}")
+            print(f"\n[ERROR] Unknown agent domain: {agent_domain}")
             return
         test_queries = {agent_domain: test_queries[agent_domain]}
 
@@ -229,24 +223,24 @@ async def run_agent_test(orchestrator: AgentOrchestrator,
     failed = 0
 
     for domain, queries in test_queries.items():
-        print(f"\n📋 Testing {domain.upper()} Agent")
+        print(f"\n[AGENT] Testing {domain.upper()} Agent")
         print("-" * 40)
 
         for query in queries:
             try:
                 result = await orchestrator.delegate(query)
                 if result.success:
-                    print(f"  ✅ {query}")
+                    print(f"  [PASS] {query}")
                     passed += 1
                 else:
-                    print(f"  ❌ {query}: {result.result}")
+                    print(f"  [FAIL] {query}: {result.result}")
                     failed += 1
             except Exception as e:
-                print(f"  ❌ {query}: {e}")
+                print(f"  [FAIL] {query}: {e}")
                 failed += 1
 
     print("\n" + "=" * 50)
-    print(f"📊 Test Results: {passed} passed, {failed} failed")
+    print(f"[RESULTS] {passed} passed, {failed} failed")
     print("=" * 50)
 
 
@@ -282,9 +276,9 @@ Examples:
     print_banner()
 
     # Initialize orchestrator
-    print("🔄 Initializing AI Employs System...")
+    print("[INIT] Initializing AI Employs System...")
     orchestrator = AgentOrchestrator()
-    print(f"✅ Loaded {len(orchestrator.agents)} agents\n")
+    print(f"[OK] Loaded {len(orchestrator.agents)} agents\n")
 
     # Handle different modes
     if args.agents:

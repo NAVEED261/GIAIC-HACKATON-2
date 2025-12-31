@@ -149,17 +149,17 @@ async def get_me(
 
 # ==================== Dapr Endpoints ====================
 
-@app.post("/dapr/subscribe")
+@app.get("/dapr/subscribe")
 async def dapr_subscribe():
-    """Dapr subscription configuration"""
+    """Dapr subscription configuration - Dapr calls this on startup"""
     return [
         {
-            "pubsubname": "kafka-pubsub",
+            "pubsubname": "pubsub",
             "topic": "task-events",
             "route": "/api/events/tasks"
         },
         {
-            "pubsubname": "kafka-pubsub",
+            "pubsubname": "pubsub",
             "topic": "reminders",
             "route": "/api/events/reminders"
         }

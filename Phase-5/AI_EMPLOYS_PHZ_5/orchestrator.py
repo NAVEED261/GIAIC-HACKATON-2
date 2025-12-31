@@ -145,7 +145,7 @@ class AgentOrchestrator:
             self.set_default_agent('feature')
 
         except ImportError as e:
-            print(f"⚠️ Warning: Could not auto-register agents: {e}")
+            print(f"[WARNING] Could not auto-register agents: {e}")
             print("   Agents can be registered manually using register_agent()")
 
     def register_agent(self, agent: BaseAgent):
@@ -213,7 +213,10 @@ class AgentOrchestrator:
                 agent="Orchestrator"
             )
 
-        print(f"\n🎯 Routing to: {agent.emoji} {agent.name}")
+        try:
+            print(f"\n[ROUTING] -> {agent.emoji} {agent.name}")
+        except UnicodeEncodeError:
+            print(f"\n[ROUTING] -> {agent.name}")
 
         # Step 3: Process
         result = await agent.process(query)
@@ -256,4 +259,4 @@ class AgentOrchestrator:
         }
 
     def __repr__(self):
-        return f"🎯 Orchestrator ({len(self.agents)} agents)"
+        return f"[Orchestrator] ({len(self.agents)} agents)"

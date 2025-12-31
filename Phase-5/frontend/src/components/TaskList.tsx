@@ -9,7 +9,7 @@ interface TaskListProps {
 }
 
 export default function TaskList({ refreshTrigger }: TaskListProps) {
-  const { userId, isAuthenticated } = useAuth()
+  const { userId, isAuthenticated, isLoading: authLoading } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -73,6 +73,18 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
     task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  // Wait for auth to load before showing "not authenticated" message
+  if (authLoading) {
+    return (
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+          <p className="text-white/60">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return (

@@ -23,6 +23,7 @@ from models.message import Message
 from middleware.auth import get_current_user
 from models.user import User
 from datetime import datetime
+from services.dapr_publisher import dapr_publisher
 
 logger = logging.getLogger(__name__)
 
@@ -87,13 +88,13 @@ OPENAI_FUNCTIONS = [
         "type": "function",
         "function": {
             "name": "complete_task",
-            "description": "Mark a task as completed",
+            "description": "Mark a task as completed by ID or title",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "task_id": {"type": "integer", "description": "Task ID to complete"}
-                },
-                "required": ["task_id"]
+                    "task_id": {"type": "integer", "description": "Task ID to complete (optional if title provided)"},
+                    "title": {"type": "string", "description": "Task title to search and complete (optional if task_id provided)"}
+                }
             }
         }
     },
@@ -101,13 +102,13 @@ OPENAI_FUNCTIONS = [
         "type": "function",
         "function": {
             "name": "delete_task",
-            "description": "Delete a task",
+            "description": "Delete a task by ID or title",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "task_id": {"type": "integer", "description": "Task ID to delete"}
-                },
-                "required": ["task_id"]
+                    "task_id": {"type": "integer", "description": "Task ID to delete (optional if title provided)"},
+                    "title": {"type": "string", "description": "Task title to search and delete (optional if task_id provided)"}
+                }
             }
         }
     },
@@ -129,7 +130,7 @@ OPENAI_FUNCTIONS = [
 ]
 
 
-def execute_function(session: Session, user_id: int, function_name: str, args: dict) -> dict:
+async def execute_function(session: Session, user_id: int, function_name: str, args: dict) -> dict:
     """Execute a function and return result"""
 
     if function_name == "add_task":
@@ -149,6 +150,10 @@ def execute_function(session: Session, user_id: int, function_name: str, args: d
         session.add(task)
         session.commit()
         session.refresh(task)
+
+        # Publish Kafka event via Dapr
+        await dapr_publisher.publish_task_created(task.id, user_id, task.priority.value)
+
         return {"success": True, "task_id": task.id, "title": task.title, "priority": task.priority.value}
 
     elif function_name == "list_tasks":
@@ -181,21 +186,56 @@ def execute_function(session: Session, user_id: int, function_name: str, args: d
         }
 
     elif function_name == "complete_task":
-        task = session.get(Task, args["task_id"])
-        if not task or task.user_id != user_id:
-            return {"success": False, "error": "Task not found"}
+        task = None
+        # Try by task_id first
+        if args.get("task_id"):
+            task = session.get(Task, args["task_id"])
+            if task and task.user_id != user_id:
+                task = None
+        # If no task found, try by title (partial match)
+        if not task and args.get("title"):
+            search_title = args["title"].lower()
+            all_tasks = session.exec(select(Task).where(Task.user_id == user_id, Task.completed == False)).all()
+            for t in all_tasks:
+                if search_title in t.title.lower() or t.title.lower() in search_title:
+                    task = t
+                    break
+        if not task:
+            return {"success": False, "error": "Task not found. Please check the task title or ID."}
         task.completed = True
         session.commit()
-        return {"success": True, "task_id": task.id, "message": f"Task '{task.title}' completed"}
+
+        # Publish Kafka event via Dapr
+        await dapr_publisher.publish_task_completed(task.id, user_id, task.title)
+
+        return {"success": True, "task_id": task.id, "message": f"Task '{task.title}' marked as completed!"}
 
     elif function_name == "delete_task":
-        task = session.get(Task, args["task_id"])
-        if not task or task.user_id != user_id:
-            return {"success": False, "error": "Task not found"}
+        task = None
+        # Try by task_id first
+        if args.get("task_id"):
+            task = session.get(Task, args["task_id"])
+            if task and task.user_id != user_id:
+                task = None
+        # If no task found, try by title (partial match)
+        if not task and args.get("title"):
+            search_title = args["title"].lower()
+            all_tasks = session.exec(select(Task).where(Task.user_id == user_id)).all()
+            for t in all_tasks:
+                if search_title in t.title.lower() or t.title.lower() in search_title:
+                    task = t
+                    break
+        if not task:
+            return {"success": False, "error": "Task not found. Please check the task title or ID."}
         title = task.title
+        task_id = task.id
         session.delete(task)
         session.commit()
-        return {"success": True, "message": f"Task '{title}' deleted"}
+
+        # Publish Kafka event via Dapr
+        await dapr_publisher.publish_task_deleted(task_id, user_id, title)
+
+        return {"success": True, "message": f"Task '{title}' has been deleted!"}
 
     elif function_name == "set_priority":
         task = session.get(Task, args["task_id"])
@@ -299,7 +339,7 @@ Use the provided functions to manage tasks. Be helpful and conversational."""
                 tools_used.append(function_name)
                 logger.info(f"Executing function: {function_name} with args: {function_args}")
 
-                result = execute_function(session, current_user.id, function_name, function_args)
+                result = await execute_function(session, current_user.id, function_name, function_args)
 
                 messages.append({
                     "role": "tool",
