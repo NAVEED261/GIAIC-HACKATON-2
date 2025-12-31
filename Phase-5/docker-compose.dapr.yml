@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: phase5-postgres
+    environment:
+      POSTGRES_USER: todouser
+      POSTGRES_PASSWORD: todopass
+      POSTGRES_DB: tododb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - phase5-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todouser -d tododb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Dapr State Store)
+  redis:
+    image: redis:7-alpine
+    container_name: phase5-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - phase5-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redpanda (Kafka-compatible - Dapr PubSub)
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: phase5-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+      - "8081:8081"
+    networks:
+      - phase5-network
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Zipkin (Distributed Tracing)
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: phase5-zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - phase5-network
+
+  # Dapr Placement Service (for Actors)
+  placement:
+    image: daprio/dapr:1.12.0
+    container_name: phase5-placement
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+    networks:
+      - phase5-network
+
+  # ==================== BACKEND + DAPR SIDECAR ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: phase5-backend
+    environment:
+      DATABASE_URL: postgresql://todouser:todopass@postgres:5432/tododb
+      JWT_SECRET: phase5-secret-key-minimum-32-characters
+      REDIS_HOST: redis
+      KAFKA_BROKERS: redpanda:9092
+      DAPR_HTTP_PORT: 3500
+      DAPR_GRPC_PORT: 50001
+    ports:
+      - "8000:8000"
+    networks:
+      - phase5-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend-dapr:
+    image: daprio/daprd:1.12.0
+    container_name: phase5-backend-dapr
+    command: [
+      "./daprd",
+      "-app-id", "backend",
+      "-app-port", "8000",
+      "-dapr-http-port", "3500",
+      "-dapr-grpc-port", "50001",
+      "-placement-host-address", "placement:50006",
+      "-components-path", "/components",
+      "-config", "/config/config.yaml"
+    ]
+    volumes:
+      - ./dapr/components:/components
+      - ./dapr:/config
+    network_mode: "service:backend"
+    depends_on:
+      - backend
+      - placement
+      - redis
+      - redpanda
+
+  # ==================== NOTIFICATION + DAPR SIDECAR ====================
+  notification:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: phase5-notification
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+      DAPR_HTTP_PORT: 3501
+      DAPR_GRPC_PORT: 50002
+    ports:
+      - "8001:8001"
+    networks:
+      - phase5-network
+    depends_on:
+      - redpanda
+
+  notification-dapr:
+    image: daprio/daprd:1.12.0
+    container_name: phase5-notification-dapr
+    command: [
+      "./daprd",
+      "-app-id", "notification",
+      "-app-port", "8001",
+      "-dapr-http-port", "3501",
+      "-dapr-grpc-port", "50002",
+      "-placement-host-address", "placement:50006",
+      "-components-path", "/components",
+      "-config", "/config/config.yaml"
+    ]
+    volumes:
+      - ./dapr/components:/components
+      - ./dapr:/config
+    network_mode: "service:notification"
+    depends_on:
+      - notification
+      - placement
+      - redis
+      - redpanda
+
+  # ==================== FRONTEND ====================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: phase5-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    networks:
+      - phase5-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  phase5-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
