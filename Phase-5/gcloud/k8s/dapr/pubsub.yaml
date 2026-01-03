@@ -1,0 +1,20 @@
+# Dapr Pub/Sub Component - Kafka
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub-kafka
+  namespace: phase5-todo
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: "redpanda-service:9092"
+    - name: consumerGroup
+      value: "phase5-group"
+    - name: clientID
+      value: "phase5-client"
+    - name: authRequired
+      value: "false"
+    - name: maxMessageBytes
+      value: "1048576"

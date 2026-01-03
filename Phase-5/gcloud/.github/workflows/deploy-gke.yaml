@@ -1,0 +1,92 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'Phase-5/**'
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: phase5-cluster
+  GKE_ZONE: us-central1-a
+  BACKEND_IMAGE: phase5-backend
+  FRONTEND_IMAGE: phase5-frontend
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+
+      - name: Build Backend Image
+        run: |
+          cd Phase-5/backend
+          docker build -t gcr.io/$PROJECT_ID/$BACKEND_IMAGE:$GITHUB_SHA .
+          docker push gcr.io/$PROJECT_ID/$BACKEND_IMAGE:$GITHUB_SHA
+          docker tag gcr.io/$PROJECT_ID/$BACKEND_IMAGE:$GITHUB_SHA gcr.io/$PROJECT_ID/$BACKEND_IMAGE:latest
+          docker push gcr.io/$PROJECT_ID/$BACKEND_IMAGE:latest
+
+      - name: Build Frontend Image
+        run: |
+          cd Phase-5/frontend
+          docker build -t gcr.io/$PROJECT_ID/$FRONTEND_IMAGE:$GITHUB_SHA .
+          docker push gcr.io/$PROJECT_ID/$FRONTEND_IMAGE:$GITHUB_SHA
+          docker tag gcr.io/$PROJECT_ID/$FRONTEND_IMAGE:$GITHUB_SHA gcr.io/$PROJECT_ID/$FRONTEND_IMAGE:latest
+          docker push gcr.io/$PROJECT_ID/$FRONTEND_IMAGE:latest
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE
+
+      - name: Deploy to GKE
+        run: |
+          # Update image tags in manifests
+          sed -i "s|gcr.io/PROJECT_ID/|gcr.io/$PROJECT_ID/|g" Phase-5/gcloud/k8s/*.yaml
+
+          # Apply all manifests
+          kubectl apply -f Phase-5/gcloud/k8s/namespace.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/secrets.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/postgres.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/redis.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/kafka.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/backend.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/frontend.yaml
+          kubectl apply -f Phase-5/gcloud/k8s/ingress.yaml
+
+          # Apply Dapr components
+          kubectl apply -f Phase-5/gcloud/k8s/dapr/
+
+      - name: Restart Deployments
+        run: |
+          kubectl rollout restart deployment/backend -n phase5-todo
+          kubectl rollout restart deployment/frontend -n phase5-todo
+
+      - name: Wait for Rollout
+        run: |
+          kubectl rollout status deployment/backend -n phase5-todo --timeout=120s
+          kubectl rollout status deployment/frontend -n phase5-todo --timeout=120s
+
+      - name: Get Public IP
+        run: |
+          echo "Waiting for Ingress IP..."
+          sleep 30
+          kubectl get ingress phase5-ingress -n phase5-todo

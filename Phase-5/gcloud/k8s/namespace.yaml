@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phase5-todo
+  labels:
+    app: phase5-todo
+    environment: production

@@ -1,0 +1,25 @@
+# GKE Cluster Configuration for Phase-5
+# This file contains cluster specifications
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gke-cluster-config
+  namespace: phase5-todo
+data:
+  PROJECT_ID: "your-project-id"  # Replace after Google Cloud setup
+  CLUSTER_NAME: "phase5-cluster"
+  REGION: "us-central1"
+  ZONE: "us-central1-a"
+  NODE_COUNT: "2"
+  MACHINE_TYPE: "e2-medium"
+
+---
+# Cluster creation command (reference):
+# gcloud container clusters create phase5-cluster \
+#   --zone us-central1-a \
+#   --num-nodes 2 \
+#   --machine-type e2-medium \
+#   --enable-autoscaling \
+#   --min-nodes 1 \
+#   --max-nodes 3

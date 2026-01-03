@@ -21,7 +21,9 @@ spec:
         - containerPort: {{ .Values.frontend.port }}
         env:
         - name: NEXT_PUBLIC_API_URL
-          value: "http://backend:{{ .Values.backend.port }}"
+          value: "http://phase5.local/api"
+        - name: HOSTNAME
+          value: "0.0.0.0"
         livenessProbe:
           httpGet:
             path: /

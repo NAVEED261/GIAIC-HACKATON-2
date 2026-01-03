@@ -1,0 +1,12 @@
+# Dapr Cron Binding for Scheduled Tasks
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: reminder-cron
+  namespace: phase5-todo
+spec:
+  type: bindings.cron
+  version: v1
+  metadata:
+    - name: schedule
+      value: "@every 1m"  # Check reminders every minute

@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phase5-ingress
+  namespace: phase5-todo
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "phase5-ip"
+    networking.gke.io/managed-certificates: "phase5-cert"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 8000
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 3000
+
+---
+# Managed Certificate for HTTPS (Optional - Free SSL)
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: phase5-cert
+  namespace: phase5-todo
+spec:
+  domains:
+    - phase5.YOUR_DOMAIN.com

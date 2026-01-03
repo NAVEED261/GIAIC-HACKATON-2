@@ -24,7 +24,14 @@ export default function DashboardPage() {
 
       try {
         const token = localStorage.getItem('token')
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        // Smart API URL: works for local, docker, and minikube
+        const getApiUrl = () => {
+          if (typeof window === 'undefined') return 'http://localhost:8000'
+          const host = window.location.hostname
+          if (host === 'phase5.local') return 'http://phase5.local'
+          return 'http://localhost:8000'
+        }
+        const apiUrl = getApiUrl()
         const response = await fetch(`${apiUrl}/api/${userId}/tasks`, {
           headers: {
             'Authorization': `Bearer ${token}`

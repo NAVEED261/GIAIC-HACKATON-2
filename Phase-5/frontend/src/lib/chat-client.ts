@@ -5,7 +5,14 @@
  * Uses JWT auth header (not userId in URL)
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Smart API URL: works for local, docker, and minikube
+const getApiUrl = () => {
+  if (typeof window === 'undefined') return 'http://localhost:8000'
+  const host = window.location.hostname
+  if (host === 'phase5.local') return 'http://phase5.local'
+  return 'http://localhost:8000'
+}
+const API_URL = getApiUrl()
 
 export interface ChatRequest {
   message: string
@@ -45,6 +52,44 @@ class ChatClient {
     }
 
     return response.json()
+  }
+
+  /**
+   * List all conversations for user
+   * @param userId User ID (unused - JWT auth)
+   * @param token Auth token
+   */
+  async listConversations(userId: number, token: string): Promise<any> {
+    const response = await fetch(`${API_URL}/api/conversations/`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to load conversations: ${response.status}`)
+    }
+
+    return response.json()
+  }
+
+  /**
+   * Delete a conversation
+   * @param userId User ID (unused - JWT auth)
+   * @param conversationId Conversation to delete
+   * @param token Auth token
+   */
+  async deleteConversation(userId: number, conversationId: number, token: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/conversations/${conversationId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete conversation: ${response.status}`)
+    }
   }
 }
 
