@@ -7,7 +7,7 @@ replicaCount: 2
 # Image configuration
 image:
   repository: todo-frontend
-  tag: "v5"
+  tag: "v7"
   pullPolicy: IfNotPresent
 
 # Container port
@@ -32,8 +32,8 @@ resources:
 # Environment configuration
 config:
   nodeEnv: "production"
-  # For browser access, use the minikube tunnel URL (run: minikube service todo-backend-service -n todo --url)
-  apiUrl: "http://127.0.0.1:49405"
+  # For browser access, use localhost since kubectl port-forward maps to 8000
+  apiUrl: "http://localhost:8000"
 
 # Health check configuration
 healthCheck:

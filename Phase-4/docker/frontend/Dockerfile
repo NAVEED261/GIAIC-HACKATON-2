@@ -29,8 +29,9 @@ COPY Phase-3/frontend/ .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build arguments for API URL (can be overridden at build time)
-ARG NEXT_PUBLIC_API_URL=http://todo-backend-service:8000
+# Build arguments for API URL - Use localhost since we use port-forward
+# kubectl port-forward maps backend to localhost:8000
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # Build the application
